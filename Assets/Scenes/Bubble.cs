@@ -8,7 +8,6 @@ public class BubbleEvent : UnityEvent<Bubble> { }
 public class Bubble : MonoBehaviour {
     public BubbleEvent Boo = new BubbleEvent();
     public BubbleEvent OnTouch = new BubbleEvent();
-    public AudioSource Audio;
     public CustomButton Button;
     private float time;
     private bool enable;
@@ -20,14 +19,13 @@ public class Bubble : MonoBehaviour {
         if (!this.enable) return;
         float scale = Time.time - this.time + 1;
         this.transform.localScale = this.transform.localScale = new Vector3(scale, scale, 1);
-        if (scale > 7) {
+        if (scale > 5) {
             this.End();
             this.Boo.Invoke(this);
         }
     }
 
     public void Touch() {
-        this.Audio.Play();
         this.End();
         this.OnTouch.Invoke(this);
     }
@@ -44,9 +42,5 @@ public class Bubble : MonoBehaviour {
     public void End() {
         this.Button.gameObject.SetActive(false);
         this.enable = false;
-    }
-
-    public void Stop() {
-        this.Button.enabled = false;
     }
 }
