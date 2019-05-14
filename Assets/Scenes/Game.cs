@@ -16,14 +16,19 @@ public class Game : MonoBehaviour {
     private float levelTime;
     private float endTime;
     private int numberOnce = 1;
-    private int score = 0;
+    private int number = 100000;
+
+    private static string prefsKey = "number";
     public void Start() {
+        this.number = PlayerPrefs.GetInt(prefsKey, this.number);
         this.levelTime = Time.time + this.LevelInterval;
         this.nextTime = Time.time;
         this.endTime = Time.time + this.EndTime;
-        this.Score.text = this.score.ToString();
+        this.Score.text = this.number.ToString();
     }
-
+    public void OnApplicationPause() {
+        PlayerPrefs.SetInt(prefsKey, this.number);
+    }
     // Update is called once per frame
     void Update() {
         if (Time.time > this.nextTime) {
@@ -70,8 +75,8 @@ public class Game : MonoBehaviour {
     }
 
     private void Recycle(Bubble bubble) {
-        this.score += 10;
-        this.Score.text = this.score.ToString();
+        this.number--;
+        this.Score.text = this.number.ToString();
         this.BubblePool.Add(bubble);
         this.Bubbles.Remove(bubble);
     }
