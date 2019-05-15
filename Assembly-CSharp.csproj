@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scenes\Bubble.cs" />
     <Compile Include="Assets\Scenes\CustomButton.cs" />
     <Compile Include="Assets\Scenes\Game.cs" />
+    <Compile Include="Assets\Scenes\Grow.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Project/Pop/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

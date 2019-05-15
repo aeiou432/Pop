@@ -59,6 +59,8 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 157
       Script: {instanceID: 0}
+    - Class: 212
+      Script: {instanceID: 0}
     - Class: 213
       Script: {instanceID: 0}
     - Class: 222
@@ -550,7 +552,7 @@ ScriptsOnlyBuild:
     className: TMP_SpriteAsset
   - hash:
       serializedVersion: 2
-      Hash: 3a0eb62c9f910a5517e82454896a3b0f
+      Hash: cf2947eb0f5308517d4e0d6efa6484f2
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Bubble
@@ -568,7 +570,7 @@ ScriptsOnlyBuild:
     className: TMP_Asset
   - hash:
       serializedVersion: 2
-      Hash: c5add7183e95064217e42bda2deae7fe
+      Hash: 97875a72123a9e0c8b0a5c949d67b378
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Game
@@ -725,4 +727,4 @@ ScriptsOnlyBuild:
   platform: 13
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/acer/Desktop/test3.apk
+  playerPath: C:/Users/acer/Desktop/tree.apk
