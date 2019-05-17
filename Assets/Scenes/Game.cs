@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class Game : MonoBehaviour {
-    public GameObject Tree;
+    public SpriteRenderer Tree;
     public Text Score;
     public Text TimeLeft;
     public Bubble ResBubble;
@@ -14,12 +14,15 @@ public class Game : MonoBehaviour {
     public float BubbleInverval = 2;
     public float LevelInterval = 10;
     public float EndTime = 150;
+    public Texture2D tex;
+
     private float nextTime;
     private float levelTime;
     private float endTime;
     private int numberOnce = 1;
     private int nowLevelTimes = 0;
     private int number = 100000;
+    private Block treeStart;
 
     private static string prefsKey = "number";
     public void Start() {
@@ -28,13 +31,14 @@ public class Game : MonoBehaviour {
         this.nextTime = Time.time;
         this.endTime = Time.time + this.EndTime;
         this.Score.text = this.number.ToString();
-        if(this.number <= 99900) {
-            this.Tree.SetActive(true);
-        }
-        else {
-            this.Tree.SetActive(false);
-        }
         this.RandomCreate();
+        this.treeStart = new Block(new Vector2(GrowDefine.LOCAL_DISPLAY_WIDTH / 2, 0), Vector2.up);
+        this.treeStart.isTop = true;
+        GlobalValue.StartBlock = this.treeStart;
+        this.tex = new Texture2D(GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT);
+        this.Tree.sprite = Sprite.Create(this.tex, new Rect(0, 0, GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT), new Vector2(0.5f, 0.5f));
+        this.Tree.sprite.texture.SetPixels32(GlobalValue.pixels);
+        this.Tree.sprite.texture.Apply();
     }
     public void OnApplicationPause() {
         PlayerPrefs.SetInt(prefsKey, this.number);
@@ -53,6 +57,11 @@ public class Game : MonoBehaviour {
             this.levelTime += this.LevelInterval;
         }*/
         this.TimeLeft.text = (this.endTime - Time.time).ToString("0.00");
+
+        this.treeStart.Grow();
+        this.treeStart.Draw();
+        this.Tree.sprite.texture.SetPixels32(GlobalValue.pixels);
+        this.Tree.sprite.texture.Apply();
     }
     private void RandomCreate() {
         Bubble bubble;
@@ -77,9 +86,6 @@ public class Game : MonoBehaviour {
     private void Recycle(Bubble bubble) {
         this.PlaySound();
         this.number--;
-        if(this.number == 99900) {
-            this.Tree.SetActive(true);
-        }
         if (this.nowLevelTimes >= 10) {
             this.numberOnce++;
             this.nowLevelTimes = 0;
