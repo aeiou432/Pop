@@ -1,40 +1,42 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 public class GrowDefine {
     public static int beginHeightRate = 1;
     public static int endHeightRate = 199;
     public static int lightLimit = 1200;
-    public static int minHeight = 40;
-    public static int subChance = 10;
+    public static int minHeight = 50;
+    public static int subChance = 20;
     public static int[] angles = new int[] { -60, 0, 60 };
-    public static int angleRange = 10;
+    public static int angleRange = 20;
     public static int LOCAL_DISPLAY_WIDTH = 500;
     public static int LOCAL_DISPLAY_HEIGHT = 1000;
+    public static Color TreeColor = new Color(1f, 1f, 1f, 1);
+    public static Color OverlapColor = new Color(0.03f, 0.03f, 0.03f, 0);
 }
 
 public static class GlobalValue {
     public static int MaxHeight;
     public static Block StartBlock;
-    public static Color32[] pixels = new Color32[GrowDefine.LOCAL_DISPLAY_WIDTH * GrowDefine.LOCAL_DISPLAY_HEIGHT];
+    public static Color[] pixels = new Color[GrowDefine.LOCAL_DISPLAY_WIDTH * GrowDefine.LOCAL_DISPLAY_HEIGHT];
 }
+
 public class Block {
-    int height = 0;
-    int width = 3;
-    int light;
-    float growChance = 1;
+    public int height = 0;
+    public int width = 3;
+    public int light;
+    public bool end = false;
+    public float growChanceRate;
+    public int level = 0;
     public int depth = 0;
     public Vector2 angleVector;
     public bool isTop = false;
-    Vector2 start;
-    Block[] subs = new Block[3];
+    public Vector2 start;
+    public Block[] subs = new Block[3];
     Block root;
 
-    public Block(Vector2 start, Vector2 angleVector, float growChance = 1f) {
+    public Block(Vector2 start, Vector2 angleVector, float growChanceRate = 0.2f) {
         this.start = start;
-        this.growChance = growChance;
+        this.growChanceRate = growChanceRate;
         this.angleVector = angleVector;
     }
     public void Grow() {
@@ -48,8 +50,15 @@ public class Block {
                 this.subs[2] = null;
             }
             for (int i = 0; i < GlobalValue.pixels.Length; i++) {
-                GlobalValue.pixels[i] = Color.black;
+                GlobalValue.pixels[i] = Color.clear;
             }
+        }
+        if (this.end) return;
+        Vector2 endPoint = this.start + this.angleVector * this.height;
+        if (endPoint.x < 0 || endPoint.x >= GrowDefine.LOCAL_DISPLAY_WIDTH ||
+            endPoint.y < 0 || endPoint.y >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
+            this.end = true;
+            return;
         }
         for (int i = 0; i < this.subs.Length; i++) {
             if (this.subs[i] != null) {
@@ -57,13 +66,14 @@ public class Block {
             }
         }
         if (this.subs[1] != null) return;
-        if (Random.Range(0, this.growChance) >= 1) return;
+        float growChance = GlobalValue.MaxHeight * this.growChanceRate + 1;
+        //float growChance = this.growChanceRate;
+        if (Random.Range(0, growChance) >= 1) return;
         this.height++;
         if (this.isTop) {
             GlobalValue.MaxHeight++;
             GlobalValue.StartBlock.SetLight();
         }
-        //this.growChance += 0.2f;
         if (this.height < GrowDefine.minHeight) return;
         if (Random.Range(0, 100) >= GrowDefine.subChance) return;
 
@@ -82,14 +92,16 @@ public class Block {
             Vector2 angleVector = rotate * this.angleVector;
             if (angleVector.y < -0.5f) continue;
             Vector2 end = this.start + this.angleVector * this.height;
-            float chance = this.growChance;
-            if(i != 1) {
-                chance = this.growChance * 2;
+            float chance = this.growChanceRate;
+            if (i != 1) {
+                chance = growChanceRate * 2;
             }
             Block newBlock = new Block(end, angleVector, chance);
+            newBlock.level = this.level + 1;
             newBlock.root = this;
             this.subs[i] = newBlock;
         }
+        this.height++;
         if (this.isTop) {
             this.isTop = false;
             this.subs[1].isTop = true;
@@ -122,8 +134,8 @@ public class Block {
         }
     }
     public void Die() {
-        for(int i = 0; i < this.subs.Length; i++) {
-            if(this.subs[i] != null) {
+        for (int i = 0; i < this.subs.Length; i++) {
+            if (this.subs[i] != null) {
                 this.subs[i].Die();
                 this.subs[i] = null;
             }
@@ -141,18 +153,19 @@ public class Block {
         LINE_THICKNESS_DRAW_COUNTERCLOCKWISE
     }
     public void Draw() {
-        Vector2 end = this.start + this.angleVector * this.height;
-        this.DrawThickLine(Mathf.RoundToInt(this.start.x), Mathf.RoundToInt(this.start.y), Mathf.RoundToInt(end.x), Mathf.RoundToInt(end.y), this.width, ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
-        for(int i = 0; i < this.subs.Length; i++) {
-            if(this.subs[i] != null) {
+        for (int i = 0; i < this.subs.Length; i++) {
+            if (this.subs[i] != null) {
                 this.subs[i].Draw();
             }
         }
+        Vector2 end = this.start + this.angleVector * this.height;
+        Color color = GrowDefine.TreeColor - GrowDefine.OverlapColor * this.level;
+        this.DrawThickLine(Mathf.RoundToInt(this.start.x), Mathf.RoundToInt(this.start.y), Mathf.RoundToInt(end.x), Mathf.RoundToInt(end.y), this.width, ThicknessMod.LINE_THICKNESS_MIDDLE, color);
     }
-    public void DrawPixel(int x, int y, Color32 color) {
+    public void DrawPixel(int x, int y, Color color) {
         GlobalValue.pixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = color;
     }
-    public void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color32 aColor) {
+    public void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color aColor) {
         for (int x = aXStart; x <= aXEnd; x++) {
             for (int y = aYStart; y <= aYEnd; y++) {
                 this.DrawPixel(x, y, aColor);
@@ -160,17 +173,17 @@ public class Block {
         }
     }
     public void DrawLineOverlap(int aXStart, int aYStart, int aXEnd, int aYEnd, Overlap aOverlap,
-        Color32 aColor) {
+        Color aColor) {
         int tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
 
         /*
          * Clip to display size
          */
         if (aXStart >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
-            aXStart = GrowDefine.LOCAL_DISPLAY_WIDTH - 1;
+            return;
         }
         if (aXStart < 0) {
-            aXStart = 0;
+            return;
         }
         if (aXEnd >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
             aXEnd = GrowDefine.LOCAL_DISPLAY_WIDTH - 1;
@@ -179,10 +192,10 @@ public class Block {
             aXEnd = 0;
         }
         if (aYStart >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
-            aYStart = GrowDefine.LOCAL_DISPLAY_HEIGHT - 1;
+            return;
         }
         if (aYStart < 0) {
-            aYStart = 0;
+            return;
         }
         if (aYEnd >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
             aYEnd = GrowDefine.LOCAL_DISPLAY_HEIGHT - 1;
@@ -264,7 +277,7 @@ public class Block {
     }
 
     public void DrawThickLine(int aXStart, int aYStart, int aXEnd, int aYEnd, int aThickness,
-        ThicknessMod aThicknessMode, Color32 aColor) {
+        ThicknessMod aThicknessMode, Color aColor) {
         int i, tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
 
         if (aThickness <= 1) {
@@ -438,6 +451,17 @@ public class Block {
                 }
                 tError += tDeltaXTimes2;
                 this.DrawLineOverlap(aXStart, aYStart, aXEnd, aYEnd, tOverlap, aColor);
+            }
+        }
+    }
+    public void Load() {
+        if(this.subs == null) {
+            this.subs = new Block[3];
+        }
+        for (int i = 0; i < this.subs.Length; i++) {
+            if (this.subs[i] != null) {
+                this.subs[i].root = this;
+                this.subs[i].Load();
             }
         }
     }

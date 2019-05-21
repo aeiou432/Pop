@@ -4,6 +4,8 @@ ScriptsOnlyBuild:
     - Bubble
     - CustomButton
     - Game
+    Unity.Mobile.AndroidLogcat.Editor.dll:
+    - Unity.Android.Logcat.AndroidLogcatConsoleWindow
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
     UnityEngine.UI.dll:
@@ -570,7 +572,7 @@ ScriptsOnlyBuild:
     className: TMP_Asset
   - hash:
       serializedVersion: 2
-      Hash: 97875a72123a9e0c8b0a5c949d67b378
+      Hash: 7500b18164ebaa55d09a064d6f59e726
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Game

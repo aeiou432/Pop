@@ -1,5 +1,6 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,27 +22,39 @@ public class Game : MonoBehaviour {
     private float endTime;
     private int numberOnce = 1;
     private int nowLevelTimes = 0;
-    private int number = 100000;
+    private int number = 0;
     private Block treeStart;
-
-    private static string prefsKey = "number";
+    private bool isTouch = false;
+    private static string touchNumber = "number";
+    private static string topHeight = "height";
+    private string dataPath;
     public void Start() {
-        this.number = PlayerPrefs.GetInt(prefsKey, this.number);
+        this.dataPath = Application.persistentDataPath + "/save.txt";
+        this.LoadData();
         this.levelTime = Time.time + this.LevelInterval;
         this.nextTime = Time.time;
         this.endTime = Time.time + this.EndTime;
         this.Score.text = this.number.ToString();
-        this.RandomCreate();
-        this.treeStart = new Block(new Vector2(GrowDefine.LOCAL_DISPLAY_WIDTH / 2, 0), Vector2.up);
-        this.treeStart.isTop = true;
-        GlobalValue.StartBlock = this.treeStart;
+        //this.RandomCreate();
+        if (this.treeStart == null) {
+            this.treeStart = new Block(new Vector2(GrowDefine.LOCAL_DISPLAY_WIDTH / 2, 0), Vector2.up);
+            this.treeStart.isTop = true;
+            GlobalValue.StartBlock = this.treeStart;
+        }
         this.tex = new Texture2D(GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT);
+        this.tex.filterMode = FilterMode.Trilinear;
         this.Tree.sprite = Sprite.Create(this.tex, new Rect(0, 0, GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT), new Vector2(0.5f, 0.5f));
-        this.Tree.sprite.texture.SetPixels32(GlobalValue.pixels);
+        this.treeStart.Draw();
+        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
     }
-    public void OnApplicationPause() {
-        PlayerPrefs.SetInt(prefsKey, this.number);
+    public void OnApplicationQuit() {
+        this.SaveDate();
+    }
+    public void OnApplicationFocus(bool hasFocus) {
+        if (!hasFocus) {
+            this.SaveDate();
+        }
     }
     // Update is called once per frame
     void Update() {
@@ -56,12 +69,25 @@ public class Game : MonoBehaviour {
             this.numberOnce++;
             this.levelTime += this.LevelInterval;
         }*/
+        if((!this.isTouch && Input.touchCount > 0) || Input.GetKeyDown(KeyCode.Mouse0)) {
+            this.isTouch = true;
+            int count = Input.touchCount;
+            if(count == 0) {
+                count = 1;
+            }
+            this.number += count;
+            this.Score.text = this.number.ToString();
+            for(int i = 0; i < count; i++) {
+                this.treeStart.Grow();
+            }
+            this.treeStart.Draw();
+            this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
+            this.Tree.sprite.texture.Apply();
+        }
+        else if (this.isTouch && Input.touchCount == 0){
+            this.isTouch = false;
+        }
         this.TimeLeft.text = (this.endTime - Time.time).ToString("0.00");
-
-        this.treeStart.Grow();
-        this.treeStart.Draw();
-        this.Tree.sprite.texture.SetPixels32(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();
     }
     private void RandomCreate() {
         Bubble bubble;
@@ -91,6 +117,9 @@ public class Game : MonoBehaviour {
             this.nowLevelTimes = 0;
         }
         this.Score.text = this.number.ToString();
+
+ 
+
         this.BubblePool.Add(bubble);
         this.Bubbles.Remove(bubble);
         if (this.Bubbles.Count <= 0) {
@@ -118,5 +147,28 @@ public class Game : MonoBehaviour {
         this.numberOnce = 1;
         this.nowLevelTimes = 0;
         this.RandomCreate();
+    }
+    private void SaveDate() {
+        Debug.LogError("=====1======" + this.number);
+        string save = JsonConvert.SerializeObject(this.treeStart);
+        using (StreamWriter sw = new StreamWriter(dataPath)) {
+            sw.WriteLine(this.number);
+            sw.WriteLine(GlobalValue.MaxHeight);
+            sw.WriteLine(save);
+        }
+    }
+    private void LoadData() {
+        if (File.Exists(dataPath)) {
+            using (StreamReader sr = new StreamReader(dataPath)) {
+                this.number = System.Convert.ToInt32(sr.ReadLine());
+                GlobalValue.MaxHeight = System.Convert.ToInt32(sr.ReadLine());
+                string data = sr.ReadLine();
+                this.treeStart = JsonConvert.DeserializeObject<Block>(data);
+            }
+            if (this.treeStart != null) {
+                this.treeStart.Load();
+                GlobalValue.StartBlock = this.treeStart;
+            }
+        }
     }
 }
