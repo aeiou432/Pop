@@ -4,8 +4,6 @@ ScriptsOnlyBuild:
     - Bubble
     - CustomButton
     - Game
-    Unity.Mobile.AndroidLogcat.Editor.dll:
-    - Unity.Android.Logcat.AndroidLogcatConsoleWindow
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
     UnityEngine.UI.dll:
@@ -38,23 +36,23 @@ ScriptsOnlyBuild:
     - Class: 104
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 9210}
-    - Class: 114
-      Script: {instanceID: 9324}
-    - Class: 114
-      Script: {instanceID: 9330}
+      Script: {instanceID: 9216}
     - Class: 114
       Script: {instanceID: 9336}
     - Class: 114
-      Script: {instanceID: 9344}
+      Script: {instanceID: 9342}
     - Class: 114
-      Script: {instanceID: 9380}
+      Script: {instanceID: 9348}
     - Class: 114
-      Script: {instanceID: 9382}
+      Script: {instanceID: 9356}
     - Class: 114
-      Script: {instanceID: 9746}
+      Script: {instanceID: 9392}
     - Class: 114
-      Script: {instanceID: 9832}
+      Script: {instanceID: 9394}
+    - Class: 114
+      Script: {instanceID: 9762}
+    - Class: 114
+      Script: {instanceID: 9850}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128

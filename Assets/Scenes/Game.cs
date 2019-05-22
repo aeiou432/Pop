@@ -28,14 +28,14 @@ public class Game : MonoBehaviour {
     private static string touchNumber = "number";
     private static string topHeight = "height";
     private string dataPath;
+    private string levelText = "Level:";
     public void Start() {
         this.dataPath = Application.persistentDataPath + "/save.txt";
         this.LoadData();
         this.levelTime = Time.time + this.LevelInterval;
         this.nextTime = Time.time;
         this.endTime = Time.time + this.EndTime;
-        this.Score.text = this.number.ToString();
-        //this.RandomCreate();
+        this.RandomCreate();
         if (this.treeStart == null) {
             this.treeStart = new Block(new Vector2(GrowDefine.LOCAL_DISPLAY_WIDTH / 2, 0), Vector2.up);
             this.treeStart.isTop = true;
@@ -69,7 +69,7 @@ public class Game : MonoBehaviour {
             this.numberOnce++;
             this.levelTime += this.LevelInterval;
         }*/
-        if((!this.isTouch && Input.touchCount > 0) || Input.GetKeyDown(KeyCode.Mouse0)) {
+        /*if((!this.isTouch && Input.touchCount > 0) || Input.GetKeyDown(KeyCode.Mouse0)) {
             this.isTouch = true;
             int count = Input.touchCount;
             if(count == 0) {
@@ -78,18 +78,17 @@ public class Game : MonoBehaviour {
             this.number += count;
             this.Score.text = this.number.ToString();
             for(int i = 0; i < count; i++) {
-                this.treeStart.Grow();
+                
             }
-            this.treeStart.Draw();
-            this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-            this.Tree.sprite.texture.Apply();
+            
         }
         else if (this.isTouch && Input.touchCount == 0){
             this.isTouch = false;
-        }
+        }*/
         this.TimeLeft.text = (this.endTime - Time.time).ToString("0.00");
     }
     private void RandomCreate() {
+        this.Score.text = this.levelText + this.numberOnce.ToString();
         Bubble bubble;
         for (int i = 0; i < this.numberOnce; i++) {
             if (this.BubblePool.Count <= 0) {
@@ -110,20 +109,22 @@ public class Game : MonoBehaviour {
         }
     }
     private void Recycle(Bubble bubble) {
-        this.PlaySound();
-        this.number--;
-        if (this.nowLevelTimes >= 10) {
-            this.numberOnce++;
-            this.nowLevelTimes = 0;
+        this.number++;
+        if(this.treeStart.Grow()) {
+            this.PlaySound();
         }
-        this.Score.text = this.number.ToString();
-
- 
+        this.treeStart.Draw();
+        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
+        this.Tree.sprite.texture.Apply();
 
         this.BubblePool.Add(bubble);
         this.Bubbles.Remove(bubble);
         if (this.Bubbles.Count <= 0) {
             this.nowLevelTimes++;
+            if (this.nowLevelTimes >= 10) {
+                this.numberOnce++;
+                this.nowLevelTimes = 0;
+            }
             this.RandomCreate();
         }
     }
@@ -149,19 +150,16 @@ public class Game : MonoBehaviour {
         this.RandomCreate();
     }
     private void SaveDate() {
-        Debug.LogError("=====1======" + this.number);
         string save = JsonConvert.SerializeObject(this.treeStart);
+        PlayerPrefs.SetInt(touchNumber, this.number);
+        PlayerPrefs.SetInt(topHeight, GlobalValue.MaxHeight);
         using (StreamWriter sw = new StreamWriter(dataPath)) {
-            sw.WriteLine(this.number);
-            sw.WriteLine(GlobalValue.MaxHeight);
             sw.WriteLine(save);
         }
     }
     private void LoadData() {
         if (File.Exists(dataPath)) {
             using (StreamReader sr = new StreamReader(dataPath)) {
-                this.number = System.Convert.ToInt32(sr.ReadLine());
-                GlobalValue.MaxHeight = System.Convert.ToInt32(sr.ReadLine());
                 string data = sr.ReadLine();
                 this.treeStart = JsonConvert.DeserializeObject<Block>(data);
             }
@@ -169,6 +167,8 @@ public class Game : MonoBehaviour {
                 this.treeStart.Load();
                 GlobalValue.StartBlock = this.treeStart;
             }
+            this.number = PlayerPrefs.GetInt(touchNumber, this.number);
+            GlobalValue.MaxHeight = PlayerPrefs.GetInt(topHeight, GlobalValue.MaxHeight);
         }
     }
 }

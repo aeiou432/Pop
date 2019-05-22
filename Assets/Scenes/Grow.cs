@@ -34,12 +34,12 @@ public class Block {
     public Block[] subs = new Block[3];
     Block root;
 
-    public Block(Vector2 start, Vector2 angleVector, float growChanceRate = 0.2f) {
+    public Block(Vector2 start, Vector2 angleVector, float growChanceRate = 0.1f) {
         this.start = start;
         this.growChanceRate = growChanceRate;
         this.angleVector = angleVector;
     }
-    public void Grow() {
+    public bool Grow() {
         if (this.light > GrowDefine.lightLimit && (this.subs[0] != null || this.subs[2] != null)) {
             if (this.subs[0] != null) {
                 this.subs[0].Die();
@@ -53,29 +53,32 @@ public class Block {
                 GlobalValue.pixels[i] = Color.clear;
             }
         }
-        if (this.end) return;
+        if (this.end) return false;
         Vector2 endPoint = this.start + this.angleVector * this.height;
         if (endPoint.x < 0 || endPoint.x >= GrowDefine.LOCAL_DISPLAY_WIDTH ||
             endPoint.y < 0 || endPoint.y >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
             this.end = true;
-            return;
+            return false;
         }
+        bool grow = false;
         for (int i = 0; i < this.subs.Length; i++) {
             if (this.subs[i] != null) {
-                this.subs[i].Grow();
+                if(this.subs[i].Grow()) {
+                    grow = true;
+                }
             }
         }
-        if (this.subs[1] != null) return;
+        if (this.subs[1] != null) return grow;
         float growChance = GlobalValue.MaxHeight * this.growChanceRate + 1;
         //float growChance = this.growChanceRate;
-        if (Random.Range(0, growChance) >= 1) return;
+        if (Random.Range(0, growChance) >= 1) return grow;
         this.height++;
         if (this.isTop) {
             GlobalValue.MaxHeight++;
             GlobalValue.StartBlock.SetLight();
         }
-        if (this.height < GrowDefine.minHeight) return;
-        if (Random.Range(0, 100) >= GrowDefine.subChance) return;
+        if (this.height < GrowDefine.minHeight) return true;
+        if (Random.Range(0, 100) >= GrowDefine.subChance) return true;
 
         for (int i = 0; i < this.subs.Length; i++) {
             int leftAngle = GrowDefine.angles[i] - GrowDefine.angleRange;
@@ -111,6 +114,7 @@ public class Block {
         if (this.root != null) {
             this.root.ReCalDepth();
         }
+        return true;
     }
     public void ReCalDepth() {
         for (int i = 0; i < this.subs.Length; i++) {
