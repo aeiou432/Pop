@@ -8,7 +8,7 @@ public class GrowDefine {
     public static int subChance = 20;
     public static int[] angles = new int[] { -60, 0, 60 };
     public static int angleRange = 20;
-    public static int LOCAL_DISPLAY_WIDTH = 500;
+    public static int LOCAL_DISPLAY_WIDTH = 600;
     public static int LOCAL_DISPLAY_HEIGHT = 1000;
     public static Color TreeColor = new Color(1f, 1f, 1f, 1);
     public static Color OverlapColor = new Color(0.03f, 0.03f, 0.03f, 0);
@@ -16,6 +16,7 @@ public class GrowDefine {
 
 public static class GlobalValue {
     public static int MaxHeight;
+    public static int TreePixel;
     public static Block StartBlock;
     public static Color[] pixels = new Color[GrowDefine.LOCAL_DISPLAY_WIDTH * GrowDefine.LOCAL_DISPLAY_HEIGHT];
 }
@@ -73,6 +74,7 @@ public class Block {
         //float growChance = this.growChanceRate;
         if (Random.Range(0, growChance) >= 1) return grow;
         this.height++;
+        GlobalValue.TreePixel++;
         if (this.isTop) {
             GlobalValue.MaxHeight++;
             GlobalValue.StartBlock.SetLight();
