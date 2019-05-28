@@ -21,7 +21,7 @@ ScriptsOnlyBuild:
     - UnityEngine.UI.Image
     - UnityEngine.UI.Text
   sceneClasses:
-    Assets/Scenes/SampleScene.unity:
+    Assets/SampleScene.unity:
     - Class: 1
       Script: {instanceID: 0}
     - Class: 4
@@ -597,7 +597,7 @@ ScriptsOnlyBuild:
     className: TMP_Asset
   - hash:
       serializedVersion: 2
-      Hash: 4e614382ce3a5bfd559591af935fe84c
+      Hash: 74dbe031dc0f377c1df6218611d8566c
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Game
@@ -759,5 +759,5 @@ ScriptsOnlyBuild:
     className: PlayableTrack
   platform: 13
   scenePathNames:
-  - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/acer/Desktop/tree.apk
+  - Assets/SampleScene.unity
+  playerPath: C:/Project/TapTreeASMR.aab

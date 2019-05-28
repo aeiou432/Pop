@@ -62,10 +62,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scenes\Bubble.cs" />
-    <Compile Include="Assets\Scenes\CustomButton.cs" />
-    <Compile Include="Assets\Scenes\Game.cs" />
-    <Compile Include="Assets\Scenes\Grow.cs" />
+    <Compile Include="Assets\Script\Bubble.cs" />
+    <Compile Include="Assets\Script\CustomButton.cs" />
+    <Compile Include="Assets\Script\Game.cs" />
+    <Compile Include="Assets\Script\Grow.cs" />
     <None Include="Assets\UnityAds\link.xml" />
     <None Include="Assets\JsonDotNet\link.xml" />
     <Reference Include="Unity.Timeline.Editor">
