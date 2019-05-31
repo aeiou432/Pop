@@ -70,7 +70,8 @@ public class Block {
             }
         }
         if (this.subs[1] != null) return grow;
-        float growChance = (GlobalValue.MaxHeight * 0.1f + 1) * this.growChanceRate;
+        int height = GlobalValue.MaxHeight >= 150 ? GlobalValue.MaxHeight - 150 : 0;
+        float growChance = (height * 0.1f + 1) * this.growChanceRate;
         //float growChance = this.growChanceRate;
         if (Random.Range(0, growChance) >= 1) return grow;
         this.height++;
@@ -86,10 +87,10 @@ public class Block {
             int leftAngle = GrowDefine.angles[i] - GrowDefine.angleRange;
             int rightAngle = GrowDefine.angles[i] + GrowDefine.angleRange + 1;
             if (this.isTop && this.angleVector.x > 0) {
-                leftAngle = GrowDefine.angles[i] - GrowDefine.angleRange / 4;
+                leftAngle = GrowDefine.angles[i] - GrowDefine.angleRange / 2;
             }
             else if (this.isTop && this.angleVector.x < 0) {
-                rightAngle = GrowDefine.angles[i] + GrowDefine.angleRange / 4 + 1;
+                rightAngle = GrowDefine.angles[i] + GrowDefine.angleRange / 2 + 1;
             }
 
             int angle = Random.Range(leftAngle, rightAngle);
