@@ -46,25 +46,25 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9264}
     - Class: 114
-      Script: {instanceID: 9398}
-    - Class: 114
       Script: {instanceID: 9400}
     - Class: 114
-      Script: {instanceID: 9406}
+      Script: {instanceID: 9402}
     - Class: 114
-      Script: {instanceID: 9412}
+      Script: {instanceID: 9408}
     - Class: 114
-      Script: {instanceID: 9420}
+      Script: {instanceID: 9414}
     - Class: 114
-      Script: {instanceID: 9456}
+      Script: {instanceID: 9422}
     - Class: 114
       Script: {instanceID: 9458}
     - Class: 114
-      Script: {instanceID: 9836}
+      Script: {instanceID: 9460}
     - Class: 114
-      Script: {instanceID: 9932}
+      Script: {instanceID: 9838}
     - Class: 114
-      Script: {instanceID: 9964}
+      Script: {instanceID: 9934}
+    - Class: 114
+      Script: {instanceID: 9966}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -612,7 +612,7 @@ ScriptsOnlyBuild:
     className: SignalTrack
   - hash:
       serializedVersion: 2
-      Hash: 0deba6e267889f1c3d4dd5c0b7688e2f
+      Hash: c7a99a65119a2531eb01fd8c70d50259
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Bubble

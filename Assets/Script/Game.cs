@@ -83,10 +83,10 @@ public class Game : MonoBehaviour {
     }
     // Update is called once per frame
     void Update() {
-        if(this.nextTime != 0 && Time.time > this.nextTime) {
+        /*if(this.nextTime != 0 && Time.time > this.nextTime) {
             this.RandomCreate();
             this.nextTime = 0;
-        }
+        }*/
         /*this.treeStart.Grow();
         this.treeStart.Draw();
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
@@ -248,9 +248,9 @@ public class Game : MonoBehaviour {
             }
             bubble.Begin(position);
             this.Bubbles.Add(bubble);
-            if(i % 2 == 1) {
-                yield return 1;
-            }
+            
+                yield return new WaitForSeconds(0.01f);
+
         }
     }
     private void RecycleBubble(Bubble bubble) {
