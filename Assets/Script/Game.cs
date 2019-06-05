@@ -233,7 +233,7 @@ public class Game : MonoBehaviour {
     private void Boo(Ball ball) {
         this.BallPool.Add(ball);
         this.Balls.Remove(ball);
-        this.StartCoroutine(this.CreateBubbles(ball.transform.position, 25));
+        this.StartCoroutine(this.CreateBubbles(ball.transform.position, 10));
     }
     private IEnumerator CreateBubbles(Vector3 position, int number) {
         Bubble bubble;

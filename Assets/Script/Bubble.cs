@@ -9,6 +9,7 @@ public class Bubble : MonoBehaviour {
     public AudioSource Audio;
     public AudioSource Audio1;
     public GameObject Light;
+    public Sprite Bubble2;
     private Vector3 target;
     private float smooth = 0.5f;
     private float enableTime;
@@ -17,12 +18,19 @@ public class Bubble : MonoBehaviour {
     private Vector3 velocity;
     void Start() {
         //this.target = this.transform.localPosition;
+        Animator bubbleRotate = this.Button.GetComponent<Animator>();
+        bubbleRotate.speed = Random.Range(0f, 1f);
         this.Button.onPointerEnter.AddListener(this.Hover);
+        if (Random.Range(0, 2) == 1) {
+            this.Button.image.sprite = this.Bubble2;
+            bubbleRotate.Play("bubble1");
+        }
     }
     public void Begin(Vector3 start) {
         this.gameObject.SetActive(true);
         this.Button.interactable = true;
-        this.Button.transform.localScale = Vector3.one;
+        float scale = Random.Range(1f, 1.5f);
+        this.Button.transform.localScale = new Vector3(scale, scale, 1);
         this.enableTime = Time.time + 0.1f;
         this.Button.gameObject.SetActive(true);
         this.Button.image.raycastTarget = true;

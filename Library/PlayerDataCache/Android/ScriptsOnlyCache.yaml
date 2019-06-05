@@ -612,7 +612,7 @@ ScriptsOnlyBuild:
     className: SignalTrack
   - hash:
       serializedVersion: 2
-      Hash: c7a99a65119a2531eb01fd8c70d50259
+      Hash: 815b3e5f5f5a2499891f7b86784fb93e
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Bubble
