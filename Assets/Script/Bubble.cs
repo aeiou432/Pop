@@ -36,8 +36,8 @@ public class Bubble : MonoBehaviour {
         this.Button.image.raycastTarget = true;
         this.transform.position = start;
         float x = Random.Range(-150f, 150f);
-        float y = Random.Range(0, 50f);
-        this.target = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z);
+        float y = Random.Range(-50, 50f);
+        this.target = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
         this.target.x += x;
         this.target.y += y;
         //this.Audio1.PlayDelayed(Random.Range(0, 0.1f));
@@ -46,7 +46,7 @@ public class Bubble : MonoBehaviour {
     }
     public void Update() {
         if (this.Button.IsInteractable()) {
-            this.transform.position = Vector3.Lerp(this.transform.position, this.target, this.smooth * Time.deltaTime);
+            this.transform.localPosition = Vector3.Lerp(this.transform.localPosition, this.target, this.smooth * Time.deltaTime);
         }
         if (this.endTime != 0 && Time.time > this.endTime) {
             this.endTime = 0;

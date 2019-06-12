@@ -20,7 +20,16 @@ public static class GlobalValue {
     public static Block StartBlock;
     public static Color[] pixels = new Color[GrowDefine.LOCAL_DISPLAY_WIDTH * GrowDefine.LOCAL_DISPLAY_HEIGHT];
 }
-
+public enum Overlap {
+    LINE_OVERLAP_NONE = 0x000,
+    LINE_OVERLAP_MAJOR = 0x001,
+    LINE_OVERLAP_MINOR = 0x002,
+}
+public enum ThicknessMod {
+    LINE_THICKNESS_MIDDLE,
+    LINE_THICKNESS_DRAW_CLOCKWISE,
+    LINE_THICKNESS_DRAW_COUNTERCLOCKWISE
+}
 public class Block {
     public int height = 0;
     public int width = 3;
@@ -149,16 +158,7 @@ public class Block {
         }
         this.root = null;
     }
-    public enum Overlap {
-        LINE_OVERLAP_NONE = 0x000,
-        LINE_OVERLAP_MAJOR = 0x001,
-        LINE_OVERLAP_MINOR = 0x002,
-    }
-    public enum ThicknessMod {
-        LINE_THICKNESS_MIDDLE,
-        LINE_THICKNESS_DRAW_CLOCKWISE,
-        LINE_THICKNESS_DRAW_COUNTERCLOCKWISE
-    }
+
     public void Draw() {
         for (int i = 0; i < this.subs.Length; i++) {
             if (this.subs[i] != null) {

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Monetization;
 using UnityEngine.UI;
@@ -68,10 +69,13 @@ public class Game : MonoBehaviour {
         this.Tex = new Texture2D(GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT);
         this.Tex.filterMode = FilterMode.Trilinear;
         this.Tree.sprite = Sprite.Create(this.Tex, new Rect(0, 0, GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT), new Vector2(0.5f, 0.5f));
-        this.treeStart.Draw();
+        /*this.treeStart.Draw();
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
-        this.OnBackgroundClick();
+        this.OnBackgroundClick();*/
+        this.LSystemTest();
+        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
+        this.Tree.sprite.texture.Apply();
     }
     public void OnApplicationQuit() {
         this.SaveDate();
@@ -140,8 +144,10 @@ public class Game : MonoBehaviour {
                 this.BallPool.RemoveAt(0);
             }
             ball.transform.SetAsFirstSibling();
-            float randomX = Random.Range(100f, Screen.width - 100f);
-            float randomY = Random.Range(100f, Screen.height - 100f);
+            float screenRate = Screen.width / 720f;
+            float edge = screenRate * 150f;
+            float randomX = Random.Range(edge, Screen.width - edge);
+            float randomY = Random.Range(edge, Screen.height - edge);
             Vector2 touchPosition = new Vector2(randomX, randomY);
             ball.Reset(touchPosition);
             this.Balls.Add(ball);
@@ -258,6 +264,180 @@ public class Game : MonoBehaviour {
         this.Bubbles.Remove(bubble);
         if(this.Bubbles.Count == 0) {
             this.RandomCreate();
+        }
+    }
+
+    public void LSystemTest() {
+        int n = 7;
+        string startPoint = "X";
+        StringBuilder newString = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < startPoint.Length; j++) {
+                if(startPoint[j] == 'X') {
+                    newString.Append("F+[[X]-X]-F[-FX]+X");
+                }
+                else if(startPoint[j] == 'F') {
+                    newString.Append("FF");
+                }
+                else {
+                    newString.Append(startPoint[j]);
+                }
+            }
+            startPoint = newString.ToString();
+            newString.Clear();
+        }
+        Quaternion leftRotate = Quaternion.AngleAxis(-25, Vector3.forward);
+        Quaternion rightRotate = Quaternion.AngleAxis(25, Vector3.forward);
+        Vector2 angleVector = leftRotate * new Vector2(0, 3);
+        Vector2 point = new Vector2(0, 0);
+        for(int i = 0; i < startPoint.Length; i++) {
+            switch(startPoint[i]) {
+                case 'F': {
+                        Vector2 end = point + angleVector;
+                        this.DrawLineOverlap(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.y),
+                            Mathf.RoundToInt(end.x), Mathf.RoundToInt(end.y), Overlap.LINE_OVERLAP_NONE, Color.white);
+                        point = end;
+                        break;
+                    }
+                case '-': {
+                        angleVector = leftRotate * angleVector;
+                        break;
+                    }
+                case '+': {
+                        angleVector = rightRotate * angleVector;
+                        break;
+                    }
+                case '[': {
+                        nodes.Push(new node() { angle = angleVector, point = point });
+                        break;
+                    }
+                case ']': {
+                        node tmp = nodes.Pop();
+                        angleVector = tmp.angle;
+                        point = tmp.point;
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+    }
+    struct node {
+        public Vector2 angle;
+        public Vector2 point;
+    }
+    Stack<node> nodes = new Stack<node>();
+    public void DrawLineOverlap(int aXStart, int aYStart, int aXEnd, int aYEnd, Overlap aOverlap,
+        Color aColor) {
+        int tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
+
+        /*
+         * Clip to display size
+         */
+        if (aXStart >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
+            return;
+        }
+        if (aXStart < 0) {
+            return;
+        }
+        if (aXEnd >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
+            aXEnd = GrowDefine.LOCAL_DISPLAY_WIDTH - 1;
+        }
+        if (aXEnd < 0) {
+            aXEnd = 0;
+        }
+        if (aYStart >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
+            return;
+        }
+        if (aYStart < 0) {
+            return;
+        }
+        if (aYEnd >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
+            aYEnd = GrowDefine.LOCAL_DISPLAY_HEIGHT - 1;
+        }
+        if (aYEnd < 0) {
+            aYEnd = 0;
+        }
+
+        if ((aXStart == aXEnd) || (aYStart == aYEnd)) {
+            //horizontal or vertical line -> fillRect() is faster
+            this.FillRect(aXStart, aYStart, aXEnd, aYEnd, aColor);
+        }
+        else {
+            //calculate direction
+            tDeltaX = aXEnd - aXStart;
+            tDeltaY = aYEnd - aYStart;
+            if (tDeltaX < 0) {
+                tDeltaX = -tDeltaX;
+                tStepX = -1;
+            }
+            else {
+                tStepX = +1;
+            }
+            if (tDeltaY < 0) {
+                tDeltaY = -tDeltaY;
+                tStepY = -1;
+            }
+            else {
+                tStepY = +1;
+            }
+            tDeltaXTimes2 = tDeltaX << 1;
+            tDeltaYTimes2 = tDeltaY << 1;
+            //draw start pixel
+            this.DrawPixel(aXStart, aYStart, aColor);
+            if (tDeltaX > tDeltaY) {
+                // start value represents a half step in Y direction
+                tError = tDeltaYTimes2 - tDeltaX;
+                while (aXStart != aXEnd) {
+                    // step in main direction
+                    aXStart += tStepX;
+                    if (tError >= 0) {
+                        if ((aOverlap & Overlap.LINE_OVERLAP_MAJOR) == Overlap.LINE_OVERLAP_MAJOR) {
+                            // draw pixel in main direction before changing
+                            this.DrawPixel(aXStart, aYStart, aColor);
+                        }
+                        // change Y
+                        aYStart += tStepY;
+                        if ((aOverlap & Overlap.LINE_OVERLAP_MINOR) == Overlap.LINE_OVERLAP_MINOR) {
+                            // draw pixel in minor direction before changing
+                            this.DrawPixel(aXStart - tStepX, aYStart, aColor);
+                        }
+                        tError -= tDeltaXTimes2;
+                    }
+                    tError += tDeltaYTimes2;
+                    this.DrawPixel(aXStart, aYStart, aColor);
+                }
+            }
+            else {
+                tError = tDeltaXTimes2 - tDeltaY;
+                while (aYStart != aYEnd) {
+                    aYStart += tStepY;
+                    if (tError >= 0) {
+                        if ((aOverlap & Overlap.LINE_OVERLAP_MAJOR) == Overlap.LINE_OVERLAP_MAJOR) {
+                            // draw pixel in main direction before changing
+                            this.DrawPixel(aXStart, aYStart, aColor);
+                        }
+                        aXStart += tStepX;
+                        if ((aOverlap & Overlap.LINE_OVERLAP_MINOR) == Overlap.LINE_OVERLAP_MINOR) {
+                            // draw pixel in minor direction before changing
+                            this.DrawPixel(aXStart, aYStart - tStepY, aColor);
+                        }
+                        tError -= tDeltaYTimes2;
+                    }
+                    tError += tDeltaXTimes2;
+                    this.DrawPixel(aXStart, aYStart, aColor);
+                }
+            }
+        }
+    }
+    public void DrawPixel(int x, int y, Color color) {
+        GlobalValue.pixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = color;
+    }
+    public void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color aColor) {
+        for (int x = aXStart; x <= aXEnd; x++) {
+            for (int y = aYStart; y <= aYEnd; y++) {
+                this.DrawPixel(x, y, aColor);
+            }
         }
     }
 }
