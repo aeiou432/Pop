@@ -73,7 +73,7 @@ public class Game : MonoBehaviour {
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
         this.OnBackgroundClick();*/
-        this.LSystemTest();
+        this.DrawLsystem(this.oldString);
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
     }
@@ -95,6 +95,15 @@ public class Game : MonoBehaviour {
         this.treeStart.Draw();
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();*/
+
+        if(Input.GetKeyUp(KeyCode.Mouse0)) {
+            this.LSystemTest();
+            this.DrawLsystem(this.oldString);
+            this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
+            this.Tree.sprite.texture.Apply();
+            this.number++;
+            this.Score.text = this.number.ToString();
+        }
     }
 
     public void OnBackgroundClick() {
@@ -266,32 +275,48 @@ public class Game : MonoBehaviour {
             this.RandomCreate();
         }
     }
-
+    string oldString = "X";
+    //string newString = string.Empty;
+    StringBuilder newString = new StringBuilder();
     public void LSystemTest() {
-        int n = 7;
-        string startPoint = "X";
-        StringBuilder newString = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < startPoint.Length; j++) {
-                if(startPoint[j] == 'X') {
-                    newString.Append("F+[[X]-X]-F[-FX]+X");
-                }
-                else if(startPoint[j] == 'F') {
-                    newString.Append("FF");
-                }
-                else {
-                    newString.Append(startPoint[j]);
-                }
+        for (int i = 0; i < this.oldString.Length; i++) {
+            char now = this.oldString[i];
+            if (now == 'X') {
+                //this.newString.Append("F+[[X]-X]-F[-FX]+X");
+                //this.newString.Append("F[+X]F[-X]+X");
+                //this.newString.Append("F[+X]X[-X]");
+                this.newString.Append("F[+X][-X]");
             }
-            startPoint = newString.ToString();
-            newString.Clear();
+            else if (now == 'F') {
+                this.newString.Append("FF");
+            }
+            else {
+                this.newString.Append(now);
+            }
+        }
+        this.oldString = this.newString.ToString();
+        this.newString.Clear();
+        /*this.oldString = this.oldString.Remove(0, 1);
+        if(this.oldString.Length == 0) {
+            this.oldString = this.newString;
+            this.newString = string.Empty;
+        }*/
+    }
+    struct node {
+        public Vector2 angle;
+        public Vector2 point;
+    }
+    Stack<node> nodes = new Stack<node>();
+    public void DrawLsystem(string treeString) {
+        for (int i = 0; i < GlobalValue.pixels.Length; i++) {
+            GlobalValue.pixels[i] = Color.clear;
         }
         Quaternion leftRotate = Quaternion.AngleAxis(-25, Vector3.forward);
         Quaternion rightRotate = Quaternion.AngleAxis(25, Vector3.forward);
-        Vector2 angleVector = leftRotate * new Vector2(0, 3);
-        Vector2 point = new Vector2(0, 0);
-        for(int i = 0; i < startPoint.Length; i++) {
-            switch(startPoint[i]) {
+        Vector2 angleVector = new Vector2(0, 3);
+        Vector2 point = new Vector2(360, 0);
+        for (int i = 0; i < treeString.Length; i++) {
+            switch (treeString[i]) {
                 case 'F': {
                         Vector2 end = point + angleVector;
                         this.DrawLineOverlap(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.y),
@@ -322,11 +347,6 @@ public class Game : MonoBehaviour {
             }
         }
     }
-    struct node {
-        public Vector2 angle;
-        public Vector2 point;
-    }
-    Stack<node> nodes = new Stack<node>();
     public void DrawLineOverlap(int aXStart, int aYStart, int aXEnd, int aYEnd, Overlap aOverlap,
         Color aColor) {
         int tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
