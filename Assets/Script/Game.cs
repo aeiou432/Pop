@@ -282,13 +282,36 @@ public class Game : MonoBehaviour {
         for (int i = 0; i < this.oldString.Length; i++) {
             char now = this.oldString[i];
             if (now == 'X') {
+                int select = Random.Range(0, 100);
+                if (select < 33) {
+                    this.newString.Append("F+[[X]-X]-F[-FX]+X");
+                }
+                else if (select < 66) {
+                    this.newString.Append("F[+X]F[-X]+X");
+                }
+                else {
+                    this.newString.Append("F[+X][-X]FX");
+                }
                 //this.newString.Append("F+[[X]-X]-F[-FX]+X");
                 //this.newString.Append("F[+X]F[-X]+X");
                 //this.newString.Append("F[+X]X[-X]");
-                this.newString.Append("F[+X][-X]");
+                //this.newString.Append("F[+X][-X]");
             }
             else if (now == 'F') {
-                this.newString.Append("FF");
+                
+                int select = Random.Range(0, 100);
+                if (select < 50) {
+                    this.newString.Append("FF");
+                }
+                else if (select < 65) {
+                    this.newString.Append("F[+F]F[-F]F");
+                }
+                else if (select < 80) {
+                    this.newString.Append("F[+F]F[-F][F]");
+                }
+                else {
+                    this.newString.Append("FF-[-F+F+F]+[+F-F-F]");
+                }
             }
             else {
                 this.newString.Append(now);
@@ -311,9 +334,9 @@ public class Game : MonoBehaviour {
         for (int i = 0; i < GlobalValue.pixels.Length; i++) {
             GlobalValue.pixels[i] = Color.clear;
         }
-        Quaternion leftRotate = Quaternion.AngleAxis(-25, Vector3.forward);
-        Quaternion rightRotate = Quaternion.AngleAxis(25, Vector3.forward);
-        Vector2 angleVector = new Vector2(0, 3);
+        Quaternion leftRotate = Quaternion.AngleAxis(-22.5f, Vector3.forward);
+        Quaternion rightRotate = Quaternion.AngleAxis(22.5f, Vector3.forward);
+        Vector2 angleVector = new Vector2(0, 6);
         Vector2 point = new Vector2(360, 0);
         for (int i = 0; i < treeString.Length; i++) {
             switch (treeString[i]) {
