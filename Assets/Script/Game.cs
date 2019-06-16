@@ -275,7 +275,7 @@ public class Game : MonoBehaviour {
             this.RandomCreate();
         }
     }
-    string oldString = "X";
+    string oldString = "F0F1F1";
     //string newString = string.Empty;
     StringBuilder newString = new StringBuilder();
     public void LSystemTest() {
@@ -298,8 +298,8 @@ public class Game : MonoBehaviour {
                 //this.newString.Append("F[+X][-X]");
             }
             else if (now == 'F') {
-                
-                int select = Random.Range(0, 100);
+                this.newString.Append(now);
+                /*int select = Random.Range(0, 100);
                 if (select < 50) {
                     this.newString.Append("FF");
                 }
@@ -311,6 +311,64 @@ public class Game : MonoBehaviour {
                 }
                 else {
                     this.newString.Append("FF-[-F+F+F]+[+F-F-F]");
+                }*/
+            }
+            else if(now == '0') {
+                char leftS = this.GetLeftSymbol(this.oldString, i);
+                char rightS = this.GetRightSymbol(this.oldString, i);
+                if (leftS == '0' && rightS == '0') {
+                    this.newString.Append("1");
+                }
+                else if (leftS == '0' && rightS == '1') {
+                    this.newString.Append("0");
+                }
+                else if (leftS == '1' && rightS == '0') {
+                    this.newString.Append("1");
+                }
+                else if (leftS == '1' && rightS == '1') {
+                    this.newString.Append("1[+F1F1]");
+                }
+                else {
+                    this.newString.Append(now);
+                }
+            }
+            else if (now == '1') {
+                char leftS = this.GetLeftSymbol(this.oldString, i);
+                char rightS = this.GetRightSymbol(this.oldString, i);
+                if (leftS == '0' && rightS == '0') {
+                    this.newString.Append("0");
+                }
+                else if (leftS == '0' && rightS == '1') {
+                    this.newString.Append("1F1");
+                }
+                else if (leftS == '1' && rightS == '0') {
+                    this.newString.Append('1');
+                }
+                else if (leftS == '1' && rightS == '1') {
+                    this.newString.Append("0");
+                }
+                else {
+                    this.newString.Append(now);
+                }
+            }
+            else if (now == '+') {
+                char leftS = this.GetLeftSymbol(this.oldString, i);
+                char rightS = this.GetRightSymbol(this.oldString, i);
+                if (leftS != ' ' && rightS != ' ') {
+                    this.newString.Append('-');
+                }
+                else {
+                    this.newString.Append(now);
+                }
+            }
+            else if (now == '-') {
+                char leftS = this.GetLeftSymbol(this.oldString, i);
+                char rightS = this.GetRightSymbol(this.oldString, i);
+                if (leftS != ' ' && rightS != ' ') {
+                    this.newString.Append('+');
+                }
+                else {
+                    this.newString.Append(now);
                 }
             }
             else {
@@ -330,13 +388,50 @@ public class Game : MonoBehaviour {
         public Vector2 point;
     }
     Stack<node> nodes = new Stack<node>();
+    private char GetLeftSymbol(string context, int index) {
+        int bracketCount = 0;
+        for (int i = index - 1; i >= 0; i--) {
+            if (context[i] == ']') {
+                bracketCount++;
+            }
+            else if (context[i] == '[') {
+                bracketCount--;
+            }
+            else if (bracketCount <= 0 && (context[i] == '0' || context[i] == '1')) {
+                return context[i];
+            }
+        }
+        return ' ';
+    }
+    private char GetRightSymbol(string context, int index) {
+        int bracketCount = 0;
+        char temp = ' ';
+        for (int i = index + 1; i < context.Length; i++) {
+            if (bracketCount < 0) {
+                return ' ';
+            }
+            if (context[i] == '[') {
+                bracketCount++;
+            }
+            else if (context[i] == ']') {
+                bracketCount--;
+            }
+            else if (bracketCount > 0) {
+                temp = context[i];
+            }
+            else if (bracketCount == 0 && (context[i] == '0' || context[i] == '1')) {
+                return context[i];
+            }
+        }
+        return temp;
+    }
     public void DrawLsystem(string treeString) {
         for (int i = 0; i < GlobalValue.pixels.Length; i++) {
             GlobalValue.pixels[i] = Color.clear;
         }
-        Quaternion leftRotate = Quaternion.AngleAxis(-22.5f, Vector3.forward);
-        Quaternion rightRotate = Quaternion.AngleAxis(22.5f, Vector3.forward);
-        Vector2 angleVector = new Vector2(0, 6);
+        Quaternion leftRotate = Quaternion.AngleAxis(-25.75f, Vector3.forward);
+        Quaternion rightRotate = Quaternion.AngleAxis(25.75f, Vector3.forward);
+        Vector2 angleVector = new Vector2(0, 10);
         Vector2 point = new Vector2(360, 0);
         for (int i = 0; i < treeString.Length; i++) {
             switch (treeString[i]) {
