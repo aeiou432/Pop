@@ -275,7 +275,7 @@ public class Game : MonoBehaviour {
             this.RandomCreate();
         }
     }
-    string oldString = "F0F1F1";
+    string oldString = "F1F1F1";
     //string newString = string.Empty;
     StringBuilder newString = new StringBuilder();
     public void LSystemTest() {
@@ -320,13 +320,13 @@ public class Game : MonoBehaviour {
                     this.newString.Append("1");
                 }
                 else if (leftS == '0' && rightS == '1') {
-                    this.newString.Append("0");
+                    this.newString.Append("1[-F1F1]");
                 }
                 else if (leftS == '1' && rightS == '0') {
-                    this.newString.Append("1");
+                    this.newString.Append("0");
                 }
                 else if (leftS == '1' && rightS == '1') {
-                    this.newString.Append("1[+F1F1]");
+                    this.newString.Append("1F1");
                 }
                 else {
                     this.newString.Append(now);
@@ -336,10 +336,10 @@ public class Game : MonoBehaviour {
                 char leftS = this.GetLeftSymbol(this.oldString, i);
                 char rightS = this.GetRightSymbol(this.oldString, i);
                 if (leftS == '0' && rightS == '0') {
-                    this.newString.Append("0");
+                    this.newString.Append("1");
                 }
                 else if (leftS == '0' && rightS == '1') {
-                    this.newString.Append("1F1");
+                    this.newString.Append("1");
                 }
                 else if (leftS == '1' && rightS == '0') {
                     this.newString.Append('1');
@@ -394,10 +394,10 @@ public class Game : MonoBehaviour {
             if (context[i] == ']') {
                 bracketCount++;
             }
-            else if (context[i] == '[') {
+            else if (bracketCount > 0 && context[i] == '[') {
                 bracketCount--;
             }
-            else if (bracketCount <= 0 && (context[i] == '0' || context[i] == '1')) {
+            else if (bracketCount == 0 && (context[i] == '0' || context[i] == '1')) {
                 return context[i];
             }
         }
@@ -431,7 +431,7 @@ public class Game : MonoBehaviour {
         }
         Quaternion leftRotate = Quaternion.AngleAxis(-25.75f, Vector3.forward);
         Quaternion rightRotate = Quaternion.AngleAxis(25.75f, Vector3.forward);
-        Vector2 angleVector = new Vector2(0, 10);
+        Vector2 angleVector = new Vector2(0, 6);
         Vector2 point = new Vector2(360, 0);
         for (int i = 0; i < treeString.Length; i++) {
             switch (treeString[i]) {
