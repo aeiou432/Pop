@@ -185,7 +185,6 @@ public static class DrawLine
     public static void DrawLineOverlap(int aXStart, int aYStart, int aXEnd, int aYEnd, Overlap aOverlap,
         Color aColor) {
         int tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
-
         /*
          * Clip to display size
          */
@@ -289,6 +288,16 @@ public static class DrawLine
         GlobalValue.pixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = color;
     }
     public static void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color aColor) {
+        if (aXStart > aXEnd) {
+            int tmp = aXStart;
+            aXStart = aXEnd;
+            aXEnd = tmp;
+        }
+        if(aYStart > aYEnd) {
+            int tmp = aYStart;
+            aYStart = aYEnd;
+            aYEnd = tmp;
+        }
         for (int x = aXStart; x <= aXEnd; x++) {
             for (int y = aYStart; y <= aYEnd; y++) {
                 DrawPixel(x, y, aColor);

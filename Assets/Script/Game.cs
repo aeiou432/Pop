@@ -47,6 +47,7 @@ public class Game : MonoBehaviour {
     private static string AdName = "video";
     private string dataPath;
 
+    private LSystem lTree;
     public void Start() {
 #if UNITY_ANDROID
         Monetization.Initialize(AndroidGameId, true);
@@ -71,9 +72,10 @@ public class Game : MonoBehaviour {
         this.Tree.sprite = Sprite.Create(this.Tex, new Rect(0, 0, GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT), new Vector2(0.5f, 0.5f));
         /*this.treeStart.Draw();
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();
-        this.OnBackgroundClick();*/
-        this.DrawLsystem(this.oldString);
+        this.Tree.sprite.texture.Apply();*/
+        //this.OnBackgroundClick();
+        this.lTree = new LSystem();
+        this.lTree.A(100, 10, 10);
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
     }
@@ -96,14 +98,14 @@ public class Game : MonoBehaviour {
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();*/
 
-        if(Input.GetKeyUp(KeyCode.Mouse0)) {
-            this.LSystemTest();
-            this.DrawLsystem(this.oldString);
+        /*if(Input.GetKeyUp(KeyCode.Mouse0)) {
+            this.lTree.Grow();
+            this.lTree.Draw();
             this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
             this.Tree.sprite.texture.Apply();
             this.number++;
             this.Score.text = this.number.ToString();
-        }
+        }*/
     }
 
     public void OnBackgroundClick() {
@@ -274,121 +276,5 @@ public class Game : MonoBehaviour {
         if(this.Bubbles.Count == 0) {
             this.RandomCreate();
         }
-    }
-    string oldString = "F1F1F1";
-    //string newString = string.Empty;
-    StringBuilder newString = new StringBuilder();
-    public void LSystemTest() {
-        for (int i = 0; i < this.oldString.Length; i++) {
-            char now = this.oldString[i];
-            if (now == 'X') {
-                int select = Random.Range(0, 100);
-                if (select < 33) {
-                    this.newString.Append("F+[[X]-X]-F[-FX]+X");
-                }
-                else if (select < 66) {
-                    this.newString.Append("F[+X]F[-X]+X");
-                }
-                else {
-                    this.newString.Append("F[+X][-X]FX");
-                }
-                //this.newString.Append("F+[[X]-X]-F[-FX]+X");
-                //this.newString.Append("F[+X]F[-X]+X");
-                //this.newString.Append("F[+X]X[-X]");
-                //this.newString.Append("F[+X][-X]");
-            }
-            else if (now == 'F') {
-                this.newString.Append(now);
-                /*int select = Random.Range(0, 100);
-                if (select < 50) {
-                    this.newString.Append("FF");
-                }
-                else if (select < 65) {
-                    this.newString.Append("F[+F]F[-F]F");
-                }
-                else if (select < 80) {
-                    this.newString.Append("F[+F]F[-F][F]");
-                }
-                else {
-                    this.newString.Append("FF-[-F+F+F]+[+F-F-F]");
-                }*/
-            }
-            else if(now == '0') {
-                char leftS = this.GetLeftSymbol(this.oldString, i);
-                char rightS = this.GetRightSymbol(this.oldString, i);
-                if (leftS == '0' && rightS == '0') {
-                    this.newString.Append("1");
-                }
-                else if (leftS == '0' && rightS == '1') {
-                    this.newString.Append("1[-F1F1]");
-                }
-                else if (leftS == '1' && rightS == '0') {
-                    this.newString.Append("0");
-                }
-                else if (leftS == '1' && rightS == '1') {
-                    this.newString.Append("1F1");
-                }
-                else {
-                    this.newString.Append(now);
-                }
-            }
-            else if (now == '1') {
-                char leftS = this.GetLeftSymbol(this.oldString, i);
-                char rightS = this.GetRightSymbol(this.oldString, i);
-                if (leftS == '0' && rightS == '0') {
-                    this.newString.Append("1");
-                }
-                else if (leftS == '0' && rightS == '1') {
-                    this.newString.Append("1");
-                }
-                else if (leftS == '1' && rightS == '0') {
-                    this.newString.Append('1');
-                }
-                else if (leftS == '1' && rightS == '1') {
-                    this.newString.Append("0");
-                }
-                else {
-                    this.newString.Append(now);
-                }
-            }
-            else if (now == '+') {
-                char leftS = this.GetLeftSymbol(this.oldString, i);
-                char rightS = this.GetRightSymbol(this.oldString, i);
-                if (leftS != ' ' && rightS != ' ') {
-                    this.newString.Append('-');
-                }
-                else {
-                    this.newString.Append(now);
-                }
-            }
-            else if (now == '-') {
-                char leftS = this.GetLeftSymbol(this.oldString, i);
-                char rightS = this.GetRightSymbol(this.oldString, i);
-                if (leftS != ' ' && rightS != ' ') {
-                    this.newString.Append('+');
-                }
-                else {
-                    this.newString.Append(now);
-                }
-            }
-            else {
-                this.newString.Append(now);
-            }
-        }
-        this.oldString = this.newString.ToString();
-        this.newString.Clear();
-        /*this.oldString = this.oldString.Remove(0, 1);
-        if(this.oldString.Length == 0) {
-            this.oldString = this.newString;
-            this.newString = string.Empty;
-        }*/
-    }
-    struct node {
-        public Vector2 angle;
-        public Vector2 point;
-    }
-    Stack<node> nodes = new Stack<node>();
-    public void DrawLsystem(string treeString) {
-        
     }
 }
