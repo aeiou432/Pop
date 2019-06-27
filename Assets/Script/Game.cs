@@ -70,14 +70,14 @@ public class Game : MonoBehaviour {
         this.Tex = new Texture2D(GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT);
         this.Tex.filterMode = FilterMode.Trilinear;
         this.Tree.sprite = Sprite.Create(this.Tex, new Rect(0, 0, GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT), new Vector2(0.5f, 0.5f));
-        /*this.treeStart.Draw();
-        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();*/
-        //this.OnBackgroundClick();
-        this.lTree = new LSystem();
-        this.lTree.A(100, 10, 10);
+        this.treeStart.Draw();
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
+        //this.OnBackgroundClick();
+        /*this.lTree = new LSystem();
+        this.lTree.Init();
+        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
+        this.Tree.sprite.texture.Apply();*/
     }
     public void OnApplicationQuit() {
         this.SaveDate();
@@ -93,19 +93,19 @@ public class Game : MonoBehaviour {
             this.RandomCreate();
             this.nextTime = 0;
         }*/
-        /*this.treeStart.Grow();
+        this.treeStart.Grow();
         this.treeStart.Draw();
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();*/
+        this.Tree.sprite.texture.Apply();
 
-        /*if(Input.GetKeyUp(KeyCode.Mouse0)) {
-            this.lTree.Grow();
+        //if(Input.GetKeyUp(KeyCode.Mouse0)) {
+            /*this.lTree.Grow();
             this.lTree.Draw();
             this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
             this.Tree.sprite.texture.Apply();
             this.number++;
-            this.Score.text = this.number.ToString();
-        }*/
+            this.Score.text = this.number.ToString();*/
+        //}
     }
 
     public void OnBackgroundClick() {
