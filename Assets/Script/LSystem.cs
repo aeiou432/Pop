@@ -5,20 +5,30 @@ using UnityEngine;
 
 public static class TreeParam {
     public static int Branches = 2;
-    public static bool Monopod = true;
-    public static float R1;
-    public static float R2;
-    public static List<float> A;
- 
+    public static bool Monopod = false;
+    public static float R1 = 0.9f;
+    public static float R2 = 0.7f;
+    public static List<float> R = new List<float>() { 0.9f, 0.7f };
+    public static float W = 0.707f;
+    //public static float W = 1f;
+    public static float DownA;
+    public static float DivergencyA = 180;
+    public static List<float> A = new List<float>() { 10, 60};
+    public static int Level;
+
+    public static void Init() {
+
+    }
 }
 public class InterNode {
     public float height = 0;
     public float maxHeight = 0;
     public float growHeight = 0;
     public int order = 0;
-    public Vector3 angleVector;
-    public Vector3 forward;
+    public Vector3 angleVector = Vector3.up;
+    public Vector3 forward = Vector3.forward;
     public List<InterNode> subs;
+    public int level = 0;
 
     public InterNode(float maxHeight) {
         this.maxHeight = maxHeight;
@@ -33,23 +43,50 @@ public class InterNode {
                 this.subs[i].Grow();
             }
         }
-        if (this.height == this.growHeight) {
+        if (this.height >= this.growHeight && this.subs == null && this.level < 10) {
+            int level = this.level + 1;
+            if (level > TreeParam.Level) {
+                TreeParam.Level = level;
+            }
+            this.subs = new List<InterNode>();
             if (this.order == 0) {
-                this.subs = new List<InterNode>();
                 for (int i = 0; i < TreeParam.Branches; i++) {
-                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R1);
+                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R[i]);
                     tmp.order = this.order + 1;
-                    tmp.Left(TreeParam.A[i], this);
+                    tmp.level = level;
+                    tmp.Down(TreeParam.A[i], this);
                     this.subs.Add(tmp);
+                    if (i == 0) {
+                        this.Divergence(TreeParam.DivergencyA, this);
+                    }
                 }
                 if(TreeParam.Monopod) {
                     InterNode tmp = new InterNode(this.maxHeight * TreeParam.R2);
                     tmp.order = this.order;
+                    tmp.level = level;
                     this.subs.Add(tmp);
                 }
             }
             else {
-
+                for (int i = 0; i < TreeParam.Branches; i++) {
+                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R[i]);
+                    tmp.order = this.order + 1;
+                    tmp.level = level;
+                    if (i == 1) {
+                        tmp.Left(TreeParam.A[i], this);
+                    }
+                    else {
+                        tmp.Left(-TreeParam.A[i], this);
+                    }
+                    tmp.Roll(this);
+                    this.subs.Add(tmp);
+                }
+                if (TreeParam.Monopod) {
+                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R2);
+                    tmp.order = this.order;
+                    tmp.level = level;
+                    this.subs.Add(tmp);
+                }
             }
         }
     }
@@ -70,11 +107,28 @@ public class InterNode {
     public void Roll(InterNode from) {
         this.forward = Vector3.Cross(from.angleVector, Vector3.Cross(Vector3.up, from.angleVector));
     }
-    public void P1() {
-
+    public void P1(InterNode tmp) {
+        
     }
     public void P2() {
 
+    }
+    public void Draw(Vector3 startPoint, float width) {
+        Vector3 endPoint = startPoint + this.angleVector * this.height;
+        DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.x), Mathf.RoundToInt(startPoint.y), Mathf.RoundToInt(endPoint.x), Mathf.RoundToInt(endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
+        float subWidth = width * TreeParam.W;
+        if (this.subs == null) {
+            return;
+        }
+        for (int i = 0; i < this.subs.Count - 1; i++) {
+            this.subs[i].Draw(endPoint, subWidth);
+        }
+        if (TreeParam.Monopod) {
+            this.subs[this.subs.Count - 1].Draw(endPoint, width - 2);
+        }
+        else {
+            this.subs[this.subs.Count - 1].Draw(endPoint, subWidth);
+        }
     }
 }
 public class LSystem {
@@ -110,7 +164,7 @@ public class LSystem {
 
     public void Grow1() {
         if (StartBlock == null) {
-            this.StartBlock = new InterNode();
+            this.StartBlock = new InterNode(100);
         }
         InterNode nowBlock = this.StartBlock;
        

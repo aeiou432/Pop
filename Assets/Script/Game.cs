@@ -32,6 +32,7 @@ public class Game : MonoBehaviour {
     private int number = 0;
     private int topNumber = 0;
     private Block treeStart;
+    private InterNode treeNode;
     private bool showAd;
     private int audioIndex1;
     private int audioIndex2;
@@ -47,6 +48,7 @@ public class Game : MonoBehaviour {
     private static string AdName = "video";
     private string dataPath;
 
+    private Vector3 startPoint = new Vector3(300, 0, 0);
     private LSystem lTree;
     public void Start() {
 #if UNITY_ANDROID
@@ -70,14 +72,16 @@ public class Game : MonoBehaviour {
         this.Tex = new Texture2D(GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT);
         this.Tex.filterMode = FilterMode.Trilinear;
         this.Tree.sprite = Sprite.Create(this.Tex, new Rect(0, 0, GrowDefine.LOCAL_DISPLAY_WIDTH, GrowDefine.LOCAL_DISPLAY_HEIGHT), new Vector2(0.5f, 0.5f));
-        this.treeStart.Draw();
+        //this.treeStart.Draw();
+        //this.OnBackgroundClick();
+        if (this.treeNode == null) {
+            this.treeNode = new InterNode(100);
+        }
+        this.treeNode.Draw(this.startPoint, TreeParam.Level * 2 + 3);
+        /*this.lTree = new LSystem();
+        this.lTree.Init();*/
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
-        //this.OnBackgroundClick();
-        /*this.lTree = new LSystem();
-        this.lTree.Init();
-        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();*/
     }
     public void OnApplicationQuit() {
         this.SaveDate();
@@ -93,10 +97,18 @@ public class Game : MonoBehaviour {
             this.RandomCreate();
             this.nextTime = 0;
         }*/
-        this.treeStart.Grow();
-        this.treeStart.Draw();
-        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();
+        /*this.treeStart.Grow();
+        this.treeStart.Draw();*/
+        //if (Input.GetKeyUp(KeyCode.Mouse0)) {
+            for (int i = 0; i < GlobalValue.pixels.Length; i++) {
+                GlobalValue.pixels[i] = Color.clear;
+            }
+            this.treeNode.Grow();
+            //this.treeNode.Draw(this.startPoint, TreeParam.Level * 2 + 3);
+            this.treeNode.Draw(this.startPoint, 10);
+            this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
+            this.Tree.sprite.texture.Apply();
+        //}
 
         //if(Input.GetKeyUp(KeyCode.Mouse0)) {
             /*this.lTree.Grow();
