@@ -69,6 +69,7 @@
     <Compile Include="Assets\Script\Game.cs" />
     <Compile Include="Assets\Script\Grow.cs" />
     <Compile Include="Assets\Script\LSystem.cs" />
+    <Compile Include="Assets\Script\Rule.cs" />
     <Compile Include="Assets\Script\Vibrater.cs" />
     <None Include="Assets\UnityAds\link.xml" />
     <None Include="Assets\JsonDotNet\link.xml" />

@@ -4,35 +4,29 @@ using System.Text;
 using UnityEngine;
 
 public static class TreeParam {
-    public static int Branches = 2;
-    public static bool Monopod = false;
-    public static float R1 = 0.9f;
-    public static float R2 = 0.7f;
-    public static List<float> R = new List<float>() { 0.9f, 0.7f };
     public static float W = 0.707f;
-    //public static float W = 1f;
-    public static float DownA;
-    public static float DivergencyA = 180;
-    public static List<float> A = new List<float>() { 10, 60};
     public static int Level;
-
-    public static void Init() {
-
-    }
+    public static RuleBase Rule;
 }
 public class InterNode {
     public float height = 0;
     public float maxHeight = 0;
     public float growHeight = 0;
     public int order = 0;
-    public Vector3 angleVector = Vector3.up;
+    public Vector3 angleVector = Vector3.down;
     public Vector3 forward = Vector3.forward;
     public List<InterNode> subs;
     public int level = 0;
 
-    public InterNode(float maxHeight) {
+    public InterNode(float maxHeight, InterNode from = null) {
         this.maxHeight = maxHeight;
         this.growHeight = maxHeight / 2;
+        if (from != null) {
+            this.angleVector = from.angleVector;
+            this.forward = from.forward;
+            this.order = from.order;
+            this.level = from.level;
+        }
     }
     public void Grow() {
         if (this.height < this.maxHeight) {
@@ -43,50 +37,17 @@ public class InterNode {
                 this.subs[i].Grow();
             }
         }
-        if (this.height >= this.growHeight && this.subs == null && this.level < 10) {
+        if (this.height >= this.growHeight && this.subs == null && this.level < 9) {
             int level = this.level + 1;
             if (level > TreeParam.Level) {
                 TreeParam.Level = level;
             }
             this.subs = new List<InterNode>();
             if (this.order == 0) {
-                for (int i = 0; i < TreeParam.Branches; i++) {
-                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R[i]);
-                    tmp.order = this.order + 1;
-                    tmp.level = level;
-                    tmp.Down(TreeParam.A[i], this);
-                    this.subs.Add(tmp);
-                    if (i == 0) {
-                        this.Divergence(TreeParam.DivergencyA, this);
-                    }
-                }
-                if(TreeParam.Monopod) {
-                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R2);
-                    tmp.order = this.order;
-                    tmp.level = level;
-                    this.subs.Add(tmp);
-                }
+                TreeParam.Rule.Order0(this);
             }
             else {
-                for (int i = 0; i < TreeParam.Branches; i++) {
-                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R[i]);
-                    tmp.order = this.order + 1;
-                    tmp.level = level;
-                    if (i == 1) {
-                        tmp.Left(TreeParam.A[i], this);
-                    }
-                    else {
-                        tmp.Left(-TreeParam.A[i], this);
-                    }
-                    tmp.Roll(this);
-                    this.subs.Add(tmp);
-                }
-                if (TreeParam.Monopod) {
-                    InterNode tmp = new InterNode(this.maxHeight * TreeParam.R2);
-                    tmp.order = this.order;
-                    tmp.level = level;
-                    this.subs.Add(tmp);
-                }
+                TreeParam.Rule.OrderOthers(this);
             }
         }
     }
@@ -115,7 +76,7 @@ public class InterNode {
     }
     public void Draw(Vector3 startPoint, float width) {
         Vector3 endPoint = startPoint + this.angleVector * this.height;
-        DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.x), Mathf.RoundToInt(startPoint.y), Mathf.RoundToInt(endPoint.x), Mathf.RoundToInt(endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
+        DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.z), Mathf.RoundToInt(-startPoint.y), Mathf.RoundToInt(endPoint.z), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
         float subWidth = width * TreeParam.W;
         if (this.subs == null) {
             return;
@@ -123,15 +84,26 @@ public class InterNode {
         for (int i = 0; i < this.subs.Count - 1; i++) {
             this.subs[i].Draw(endPoint, subWidth);
         }
-        if (TreeParam.Monopod) {
-            this.subs[this.subs.Count - 1].Draw(endPoint, width - 2);
-        }
-        else {
+        //if (TreeParam.Monopod) {
+            //this.subs[this.subs.Count - 1].Draw(endPoint, width - 2);
+        //}
+        //else {
             this.subs[this.subs.Count - 1].Draw(endPoint, subWidth);
-        }
+        //}
     }
 }
 public class LSystem {
+    private InterNode node;
+    private Vector3 nodeStart = new Vector3(0, 0, 300);
+    public void LInit() {
+        TreeParam.Rule = new Rule1();
+        this.node = new InterNode(100);
+        this.node.Draw(this.nodeStart, 10);
+    }
+    public void Update() {
+        this.node.Grow();
+        this.node.Draw(this.nodeStart, 10);
+    }
     public int period = 50;
     private string OldString;
     private float growChance = 100f;
@@ -299,34 +271,37 @@ public class LSystem {
     }
 
     private float r1 = 0.9f;
-    private float r2 = 0.6f;
+    private float r2 = 0.7f;
     private float a0 = 45;
     private float a1 = 10;
-    private float a2 = 45;
+    private float a2 = 60;
     private float d = 137.5f;
     private float w = 0.707f;
     //private float w = 1f;
 
-    private Vector3 startPoint = new Vector3(350, 0, 0);
-    private Vector3 nowAngle = Vector3.up;
+    private Vector3 startPoint = new Vector3(0, 0, 300);
+    private Vector3 nowAngle = Vector3.down;
     private Vector3 up = new Vector3(0, 0, 1);
     public void Reset() {
-        this.startPoint = new Vector3(350, 0, 0);
-        this.nowAngle = Vector3.up;
+        this.startPoint = new Vector3(0, 0, 300);
+        this.nowAngle = Vector3.down;
         this.up = new Vector3(0, 0, 1);
+    }
+    public void Init() {
+        this.A(100, 10, 10);
     }
     public void A(float length, float width, int depth) {
         if (depth == 0) return;
         int nextDepth = depth - 1;
-        F(length, width);
+        /*F(length, width);
 
         this.Push();
         this.Down(this.a0);
         B(length * r2, width * w, nextDepth);
         this.Pop();
         this.Divergency(this.d);
-        A(length * r1, width * w, nextDepth);
-        /*F(length, width);
+        A(length * r1, width * w, nextDepth);*/
+        F(length, width);
         this.Push();
         this.Down(this.a1);
         B(length * this.r1, width * this.w, nextDepth);
@@ -335,19 +310,19 @@ public class LSystem {
         this.Push();
         this.Down(this.a2);
         B(length * this.r2, width * this.w, nextDepth);
-        this.Pop();*/
+        this.Pop();
     }
     public void B(float length, float width, int depth) {
         if (depth == 0) return;
         int nextDepth = depth - 1;
-        F(length, width);
+        /*F(length, width);
         this.Push();
         this.Right(this.a2);
         this.Roll();
         C(length * r2, width * w, nextDepth);
         this.Pop();
-        C(length * r1, width * w, nextDepth);
-        /*F(length, width);
+        C(length * r1, width * w, nextDepth);*/
+        F(length, width);
         this.Push();
         this.Left(this.a1);
         this.Roll();
@@ -357,7 +332,7 @@ public class LSystem {
         this.Right(this.a2);
         this.Roll();
         B(length * this.r2, width * w, nextDepth);
-        this.Pop();*/
+        this.Pop();
     }
     public void C(float length, float width, int depth) {
         if (depth == 0) return;
@@ -412,8 +387,8 @@ public class LSystem {
     }
     public void F(float length, float width) {
         Vector3 end = this.startPoint + (this.nowAngle * length);
-        DrawLine.DrawThickLine(Mathf.RoundToInt(this.startPoint.x), Mathf.RoundToInt(this.startPoint.y),
-                            Mathf.RoundToInt(end.x), Mathf.RoundToInt(end.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
+        DrawLine.DrawThickLine(Mathf.RoundToInt(this.startPoint.z), Mathf.RoundToInt(-this.startPoint.y),
+                            Mathf.RoundToInt(end.z), Mathf.RoundToInt(-end.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
         this.startPoint = end;
     }
 }
