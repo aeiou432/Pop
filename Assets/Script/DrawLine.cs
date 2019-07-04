@@ -286,6 +286,7 @@ public static class DrawLine
     }
     public static void DrawPixel(int x, int y, Color color) {
         GlobalValue.pixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = color;
+        GlobalValue.fillPixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = true;
     }
     public static void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color aColor) {
         if (aXStart > aXEnd) {

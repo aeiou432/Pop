@@ -19,6 +19,7 @@ public static class GlobalValue {
     public static int TreePixel;
     public static Block StartBlock;
     public static Color[] pixels = new Color[GrowDefine.LOCAL_DISPLAY_WIDTH * GrowDefine.LOCAL_DISPLAY_HEIGHT];
+    public static bool[] fillPixels = new bool[GrowDefine.LOCAL_DISPLAY_WIDTH * GrowDefine.LOCAL_DISPLAY_HEIGHT];
 }
 public enum Overlap {
     LINE_OVERLAP_NONE = 0x000,

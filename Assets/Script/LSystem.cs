@@ -5,7 +5,8 @@ using UnityEngine;
 
 public static class TreeParam {
     public static float W = 0.707f;
-    public static int Level;
+    public static int MaxLevel = 9;
+    public static int TopLevel;
     public static RuleBase Rule;
 }
 public class InterNode {
@@ -17,15 +18,23 @@ public class InterNode {
     public Vector3 forward = Vector3.forward;
     public List<InterNode> subs;
     public int level = 0;
+    public int branchMethod = 0;
 
-    public InterNode(float maxHeight, InterNode from = null) {
-        this.maxHeight = maxHeight;
-        this.growHeight = maxHeight / 2;
+    public InterNode(float maxHeight, InterNode from = null, bool mainOrder = false) {
         if (from != null) {
             this.angleVector = from.angleVector;
             this.forward = from.forward;
-            this.order = from.order;
-            this.level = from.level;
+            this.level = from.level + 1;
+            if (!mainOrder) {
+                this.order = from.order + 1;
+            }
+        }
+        this.maxHeight = maxHeight;
+        if (this.level <= 1) {
+            this.growHeight = maxHeight / 10;
+        }
+        else {
+            this.growHeight = maxHeight;
         }
     }
     public void Grow() {
@@ -37,18 +46,13 @@ public class InterNode {
                 this.subs[i].Grow();
             }
         }
-        if (this.height >= this.growHeight && this.subs == null && this.level < 9) {
+        if (this.height >= this.growHeight && this.subs == null && this.level < TreeParam.MaxLevel) {
             int level = this.level + 1;
-            if (level > TreeParam.Level) {
-                TreeParam.Level = level;
+            if (level > TreeParam.TopLevel) {
+                TreeParam.TopLevel = level;
             }
             this.subs = new List<InterNode>();
-            if (this.order == 0) {
-                TreeParam.Rule.Order0(this);
-            }
-            else {
-                TreeParam.Rule.OrderOthers(this);
-            }
+            TreeParam.Rule.P[this.branchMethod](this);
         }
     }
     public void Left(float angle, InterNode from) {
@@ -68,15 +72,9 @@ public class InterNode {
     public void Roll(InterNode from) {
         this.forward = Vector3.Cross(from.angleVector, Vector3.Cross(Vector3.up, from.angleVector));
     }
-    public void P1(InterNode tmp) {
-        
-    }
-    public void P2() {
-
-    }
     public void Draw(Vector3 startPoint, float width) {
         Vector3 endPoint = startPoint + this.angleVector * this.height;
-        DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.z), Mathf.RoundToInt(-startPoint.y), Mathf.RoundToInt(endPoint.z), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
+        DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.x), Mathf.RoundToInt(-startPoint.y), Mathf.RoundToInt(endPoint.x), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
         float subWidth = width * TreeParam.W;
         if (this.subs == null) {
             return;
@@ -84,311 +82,45 @@ public class InterNode {
         for (int i = 0; i < this.subs.Count - 1; i++) {
             this.subs[i].Draw(endPoint, subWidth);
         }
-        //if (TreeParam.Monopod) {
-            //this.subs[this.subs.Count - 1].Draw(endPoint, width - 2);
-        //}
-        //else {
-            this.subs[this.subs.Count - 1].Draw(endPoint, subWidth);
-        //}
+        this.subs[this.subs.Count - 1].Draw(endPoint, subWidth);
     }
 }
 public class LSystem {
     private InterNode node;
-    private Vector3 nodeStart = new Vector3(0, 0, 300);
-    public void LInit() {
-        TreeParam.Rule = new Rule1();
-        this.node = new InterNode(100);
-        this.node.Draw(this.nodeStart, 10);
-    }
-    public void Update() {
-        this.node.Grow();
-        this.node.Draw(this.nodeStart, 10);
-    }
-    public int period = 50;
-    private string OldString;
-    private float growChance = 100f;
-    private float deathChance = 10f;
-    private float mainOrderGrow = 100;
-    private float mainOrderDeath = 0;
-    private int maxOrder = 5000;
-    private float leftAngle = -45f;
-    private float rightAngle = 45f;
-    private float divergenceAngle = 137.5f;
-    private int branches = 2;
-    private bool monopod = false;
-    private int age;
-
-    private int growTime = 0;
-    private struct Node {
-        public Vector3 angle;
-        public Vector3 point;
-        public Vector3 divergence;
-        public float width;
-        public Vector3 up;
-        public Vector3 right;
-        public Vector3 forward;
-    }
-    private Stack<Node> nodes = new Stack<Node>();
-    private StringBuilder newString = new StringBuilder();
-
-    private InterNode StartBlock;
- 
-
-    public void Grow1() {
-        if (StartBlock == null) {
-            this.StartBlock = new InterNode(100);
-        }
-        InterNode nowBlock = this.StartBlock;
-       
+    private Vector3 nodeStart = new Vector3(300, 0, 0);
+    private int length = 150;
+    public int GrowNumber;
+    public void Init() {
+        TreeParam.Rule = new Rule2();
+        this.node = new InterNode(this.length);
+        this.CountGrowNumber();
+        this.node.Draw(this.nodeStart, TreeParam.TopLevel * 1.5f + 1);
     }
     public void Grow() {
-        int order = 0;
-        this.age++;
-        for (int i = 0; i < this.OldString.Length; i++) {
-            switch (this.OldString[i]) {
-                case 'F':
-                    
-                    break;
-                case 'T':
-                    if (this.growTime < this.period) {
-                        this.newString.Append("FT");
-                        break;
-                    }
-                    if (order >= this.maxOrder) {
-                        this.newString.Append("FT");
-                        break;
-                    }
-                    float chance = Random.Range(0f, 100f);
-                    if (order == 0) {
-                        if (chance < this.mainOrderGrow) {
-                            this.newString.Append("W");
-                            for (int j = 0; j < this.branches; j++) {
-                                this.newString.Append("/[+$FT]");
-                            }
-                            if (this.monopod) {
-                                this.newString.Append("FT");
-                            }
-                        }
-                        else {
-                            this.newString.Append("FT");
-                        }
-                    }
-                    else {
-                        if (chance < this.growChance) {
-                            this.newString.Append("W");
-                            for (int j = 0; j < this.branches; j++) {
-                                this.newString.Append("/[+$FT]");
-                            }
-                            if (this.monopod) {
-                                this.newString.Append("FT");
-                            }
-                        }
-                        else {
-                            this.newString.Append("FT");
-                        }
-                    }
-                    break;
-                case '[':
-                    order++;
-                    this.newString.Append(this.OldString[i]);
-                    break;
-                case ']':
-                    order--;
-                    this.newString.Append(this.OldString[i]);
-                    break;
-                default:
-                    this.newString.Append(this.OldString[i]);
-                    break;
-            }
-        }
-        if (this.growTime >= this.period) {
-            this.growTime = 0;
-        }
-        this.OldString = this.newString.ToString();
-        this.newString.Clear();
+        this.GrowNumber--;
+        this.node.Grow();
     }
-
     public void Draw() {
-        for (int i = 0; i < GlobalValue.pixels.Length; i++) {
-            GlobalValue.pixels[i] = Color.clear;
-        }
-        Vector3 angleVector = new Vector3(0, 1, 0);
-        Vector3 forward = Vector3.forward;
-        Vector3 point = new Vector3(350, 0, 0);
-        float width = this.age / 50 + 1;
-        for (int i = 0; i < this.OldString.Length; i++) {
-            switch (this.OldString[i]) {
-                case 'F': {
-                        Vector3 end = point + angleVector;
-                        DrawLine.DrawThickLine(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.y),
-                            Mathf.RoundToInt(end.x), Mathf.RoundToInt(end.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
-                        point = end;
-                        break;
-                    }
-                case '-': {
-                        Quaternion leftRotate = Quaternion.AngleAxis(this.leftAngle, forward);
-                        angleVector = leftRotate * angleVector;
-                        break;
-                    }
-                case '+': {
-                        Quaternion rightRotate = Quaternion.AngleAxis(this.rightAngle, forward);
-                        angleVector = rightRotate * angleVector;
-                        break;
-                    }
-                case '[': {
-                        nodes.Push(new Node() {
-                            angle = angleVector,
-                            point = point,
-                            forward = forward,
-                            width = width });
-                        break;
-                    }
-                case ']': {
-                        Node tmp = nodes.Pop();
-                        angleVector = tmp.angle;
-                        point = tmp.point;
-                        forward = tmp.forward;
-                        width = tmp.width;
-                        break;
-                    }
-                case '/': {
-                        Quaternion divergenceRotate = Quaternion.AngleAxis(this.divergenceAngle, angleVector);
-                        forward = divergenceRotate * forward;
-                        break;
-                    }
-                case '$': {
-                        forward = Vector3.Cross(angleVector, Vector3.Cross(Vector3.up, angleVector));
-                        break;
-                    }
-                case 'W': {
-                        width = width * 0.707f;
-                        break;
-                    }
-                default:
-                    break;
+        this.node.Draw(this.nodeStart, TreeParam.TopLevel * 1.5f + 1);
+    }
+    private void CountGrowNumber() {
+        int total = 0;
+        float lenth = this.length;
+        float maxR = 0;
+        for (int i = 0; i < TreeParam.Rule.R.Count; i++) {
+            if (TreeParam.Rule.R[i] > maxR) {
+                maxR = TreeParam.Rule.R[i];
             }
         }
-    }
-
-    private float r1 = 0.9f;
-    private float r2 = 0.7f;
-    private float a0 = 45;
-    private float a1 = 10;
-    private float a2 = 60;
-    private float d = 137.5f;
-    private float w = 0.707f;
-    //private float w = 1f;
-
-    private Vector3 startPoint = new Vector3(0, 0, 300);
-    private Vector3 nowAngle = Vector3.down;
-    private Vector3 up = new Vector3(0, 0, 1);
-    public void Reset() {
-        this.startPoint = new Vector3(0, 0, 300);
-        this.nowAngle = Vector3.down;
-        this.up = new Vector3(0, 0, 1);
-    }
-    public void Init() {
-        this.A(100, 10, 10);
-    }
-    public void A(float length, float width, int depth) {
-        if (depth == 0) return;
-        int nextDepth = depth - 1;
-        /*F(length, width);
-
-        this.Push();
-        this.Down(this.a0);
-        B(length * r2, width * w, nextDepth);
-        this.Pop();
-        this.Divergency(this.d);
-        A(length * r1, width * w, nextDepth);*/
-        F(length, width);
-        this.Push();
-        this.Down(this.a1);
-        B(length * this.r1, width * this.w, nextDepth);
-        this.Pop();
-        this.Divergency(180);
-        this.Push();
-        this.Down(this.a2);
-        B(length * this.r2, width * this.w, nextDepth);
-        this.Pop();
-    }
-    public void B(float length, float width, int depth) {
-        if (depth == 0) return;
-        int nextDepth = depth - 1;
-        /*F(length, width);
-        this.Push();
-        this.Right(this.a2);
-        this.Roll();
-        C(length * r2, width * w, nextDepth);
-        this.Pop();
-        C(length * r1, width * w, nextDepth);*/
-        F(length, width);
-        this.Push();
-        this.Left(this.a1);
-        this.Roll();
-        B(length * this.r1, width * w, nextDepth);
-        this.Pop();
-        this.Push();
-        this.Right(this.a2);
-        this.Roll();
-        B(length * this.r2, width * w, nextDepth);
-        this.Pop();
-    }
-    public void C(float length, float width, int depth) {
-        if (depth == 0) return;
-        int nextDepth = depth - 1;
-        F(length, width);
-        this.Push();
-        this.Left(this.a2);
-        this.Roll();
-        B(length * r2, width * w, nextDepth);
-        this.Pop();
-        B(length * r1, width * w, nextDepth);
-    }
-    public void Push() {
-        nodes.Push(new Node() {
-            angle = this.nowAngle,
-            point = this.startPoint,
-            forward = this.up
-        });
-    }
-    public void Pop() {
-        Node tmp = nodes.Pop();
-        this.nowAngle = tmp.angle;
-        this.startPoint = tmp.point;
-        this.up = tmp.forward;
-    }
-    public void Left(float angle) {
-        Quaternion Rotate = Quaternion.AngleAxis(angle, this.up);
-        this.nowAngle = Rotate * this.nowAngle;
-        this.up = Rotate * this.up;
-        return;
-    }
-    public void Right(float angle) {
-        Quaternion Rotate = Quaternion.AngleAxis(-angle, this.up);
-        this.nowAngle = Rotate * this.nowAngle;
-        this.up = Rotate * this.up;
-        return;
-    }
-    public void Down(float angle) {
-        Vector3 right = Vector3.Cross(this.nowAngle, this.up);
-        Quaternion Rotate = Quaternion.AngleAxis(angle, right);
-        this.nowAngle = Rotate * this.nowAngle;
-        this.up = Rotate * this.up;
-    }
-    public void Divergency(float angle) {
-        Quaternion Rotate = Quaternion.AngleAxis(angle, this.nowAngle);
-        this.nowAngle = Rotate * this.nowAngle;
-        this.up = Rotate * this.up;
-        return;
-    }
-    public void Roll() {
-        this.up = Vector3.Cross(this.nowAngle, Vector3.Cross(Vector3.up, this.nowAngle));
-    }
-    public void F(float length, float width) {
-        Vector3 end = this.startPoint + (this.nowAngle * length);
-        DrawLine.DrawThickLine(Mathf.RoundToInt(this.startPoint.z), Mathf.RoundToInt(-this.startPoint.y),
-                            Mathf.RoundToInt(end.z), Mathf.RoundToInt(-end.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
-        this.startPoint = end;
+        for (int i = 0; i <= TreeParam.MaxLevel; i++) {
+            if (i <= 1) {
+                total += ((int)lenth / 10);
+            }
+            else {
+                total += Mathf.CeilToInt(lenth);
+            }
+            lenth *= maxR;
+        }
+        this.GrowNumber = total + 1;
     }
 }
