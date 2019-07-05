@@ -63,11 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\Ball.cs" />
+    <Compile Include="Assets\Script\Ball1.cs" />
     <Compile Include="Assets\Script\Bubble.cs" />
     <Compile Include="Assets\Script\CustomButton.cs" />
     <Compile Include="Assets\Script\DrawLine.cs" />
     <Compile Include="Assets\Script\Game.cs" />
-    <Compile Include="Assets\Script\Grow.cs" />
     <Compile Include="Assets\Script\LSystem.cs" />
     <Compile Include="Assets\Script\Rule.cs" />
     <Compile Include="Assets\Script\Vibrater.cs" />

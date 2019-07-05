@@ -1,13 +1,20 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 
-public static class TreeParam {
+public static class GlobalDefine {
     public static float W = 0.707f;
     public static int MaxLevel = 9;
+    public static int LOCAL_DISPLAY_WIDTH = 600;
+    public static int LOCAL_DISPLAY_HEIGHT = 1000;
+
+}
+public static class GlobalValue {
     public static int TopLevel;
+    public static int RuleIndex;
     public static RuleBase Rule;
+    public static Color[] pixels = new Color[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
+    public static bool[] fillPixels = new bool[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
 }
 public class InterNode {
     public float height = 0;
@@ -46,13 +53,13 @@ public class InterNode {
                 this.subs[i].Grow();
             }
         }
-        if (this.height >= this.growHeight && this.subs == null && this.level < TreeParam.MaxLevel) {
+        if (this.height >= this.growHeight && this.subs == null && this.level < GlobalDefine.MaxLevel) {
             int level = this.level + 1;
-            if (level > TreeParam.TopLevel) {
-                TreeParam.TopLevel = level;
+            if (level > GlobalValue.TopLevel) {
+                GlobalValue.TopLevel = level;
             }
             this.subs = new List<InterNode>();
-            TreeParam.Rule.P[this.branchMethod](this);
+            GlobalValue.Rule.P[this.branchMethod](this);
         }
     }
     public void Left(float angle, InterNode from) {
@@ -75,7 +82,7 @@ public class InterNode {
     public void Draw(Vector3 startPoint, float width) {
         Vector3 endPoint = startPoint + this.angleVector * this.height;
         DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.x), Mathf.RoundToInt(-startPoint.y), Mathf.RoundToInt(endPoint.x), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
-        float subWidth = width * TreeParam.W;
+        float subWidth = width * GlobalDefine.W;
         if (this.subs == null) {
             return;
         }
@@ -86,33 +93,39 @@ public class InterNode {
     }
 }
 public class LSystem {
-    private InterNode node;
+    [JsonProperty] private InterNode node;
     private Vector3 nodeStart = new Vector3(300, 0, 0);
     private int length = 150;
     public int GrowNumber;
     public void Init() {
-        TreeParam.Rule = new Rule2();
+        GlobalValue.Rule = RuleManager.Instance.RandomPickRule();
+        GlobalValue.RuleIndex = RuleManager.Instance.RuleIndex;
         this.node = new InterNode(this.length);
         this.CountGrowNumber();
-        this.node.Draw(this.nodeStart, TreeParam.TopLevel * 1.5f + 1);
     }
     public void Grow() {
         this.GrowNumber--;
         this.node.Grow();
     }
     public void Draw() {
-        this.node.Draw(this.nodeStart, TreeParam.TopLevel * 1.5f + 1);
+        this.node.Draw(this.nodeStart, GlobalValue.TopLevel * 1.5f + 1);
+    }
+    public string GetJsonData() {
+        return JsonConvert.SerializeObject(this.node);
+    }
+    public void LoadJsonData(string data) {
+        this.node = JsonConvert.DeserializeObject<InterNode>(data);
     }
     private void CountGrowNumber() {
         int total = 0;
         float lenth = this.length;
         float maxR = 0;
-        for (int i = 0; i < TreeParam.Rule.R.Count; i++) {
-            if (TreeParam.Rule.R[i] > maxR) {
-                maxR = TreeParam.Rule.R[i];
+        for (int i = 0; i < GlobalValue.Rule.R.Count; i++) {
+            if (GlobalValue.Rule.R[i] > maxR) {
+                maxR = GlobalValue.Rule.R[i];
             }
         }
-        for (int i = 0; i <= TreeParam.MaxLevel; i++) {
+        for (int i = 0; i <= GlobalDefine.MaxLevel; i++) {
             if (i <= 1) {
                 total += ((int)lenth / 10);
             }

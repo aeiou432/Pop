@@ -1,9 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public static class DrawLine
-{
+public enum Overlap {
+    LINE_OVERLAP_NONE = 0x000,
+    LINE_OVERLAP_MAJOR = 0x001,
+    LINE_OVERLAP_MINOR = 0x002,
+}
+public enum ThicknessMod {
+    LINE_THICKNESS_MIDDLE,
+    LINE_THICKNESS_DRAW_CLOCKWISE,
+    LINE_THICKNESS_DRAW_COUNTERCLOCKWISE
+}
+public static class DrawLine {
     public static void DrawThickLine(int aXStart, int aYStart, int aXEnd, int aYEnd, int aThickness,
         ThicknessMod aThicknessMode, Color aColor) {
         int i, tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
@@ -14,26 +21,26 @@ public static class DrawLine
         /*
          * Clip to display size
          */
-        if (aXStart >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
-            aXStart = GrowDefine.LOCAL_DISPLAY_WIDTH - 1;
+        if (aXStart >= GlobalDefine.LOCAL_DISPLAY_WIDTH) {
+            aXStart = GlobalDefine.LOCAL_DISPLAY_WIDTH - 1;
         }
         if (aXStart < 0) {
             aXStart = 0;
         }
-        if (aXEnd >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
-            aXEnd = GrowDefine.LOCAL_DISPLAY_WIDTH - 1;
+        if (aXEnd >= GlobalDefine.LOCAL_DISPLAY_WIDTH) {
+            aXEnd = GlobalDefine.LOCAL_DISPLAY_WIDTH - 1;
         }
         if (aXEnd < 0) {
             aXEnd = 0;
         }
-        if (aYStart >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
-            aYStart = GrowDefine.LOCAL_DISPLAY_HEIGHT - 1;
+        if (aYStart >= GlobalDefine.LOCAL_DISPLAY_HEIGHT) {
+            aYStart = GlobalDefine.LOCAL_DISPLAY_HEIGHT - 1;
         }
         if (aYStart < 0) {
             aYStart = 0;
         }
-        if (aYEnd >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
-            aYEnd = GrowDefine.LOCAL_DISPLAY_HEIGHT - 1;
+        if (aYEnd >= GlobalDefine.LOCAL_DISPLAY_HEIGHT) {
+            aYEnd = GlobalDefine.LOCAL_DISPLAY_HEIGHT - 1;
         }
         if (aYEnd < 0) {
             aYEnd = 0;
@@ -188,26 +195,26 @@ public static class DrawLine
         /*
          * Clip to display size
          */
-        if (aXStart >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
+        if (aXStart >= GlobalDefine.LOCAL_DISPLAY_WIDTH) {
             return;
         }
         if (aXStart < 0) {
             return;
         }
-        if (aXEnd >= GrowDefine.LOCAL_DISPLAY_WIDTH) {
-            aXEnd = GrowDefine.LOCAL_DISPLAY_WIDTH - 1;
+        if (aXEnd >= GlobalDefine.LOCAL_DISPLAY_WIDTH) {
+            aXEnd = GlobalDefine.LOCAL_DISPLAY_WIDTH - 1;
         }
         if (aXEnd < 0) {
             aXEnd = 0;
         }
-        if (aYStart >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
+        if (aYStart >= GlobalDefine.LOCAL_DISPLAY_HEIGHT) {
             return;
         }
         if (aYStart < 0) {
             return;
         }
-        if (aYEnd >= GrowDefine.LOCAL_DISPLAY_HEIGHT) {
-            aYEnd = GrowDefine.LOCAL_DISPLAY_HEIGHT - 1;
+        if (aYEnd >= GlobalDefine.LOCAL_DISPLAY_HEIGHT) {
+            aYEnd = GlobalDefine.LOCAL_DISPLAY_HEIGHT - 1;
         }
         if (aYEnd < 0) {
             aYEnd = 0;
@@ -285,8 +292,8 @@ public static class DrawLine
         }
     }
     public static void DrawPixel(int x, int y, Color color) {
-        GlobalValue.pixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = color;
-        GlobalValue.fillPixels[x + y * GrowDefine.LOCAL_DISPLAY_WIDTH] = true;
+        GlobalValue.pixels[x + y * GlobalDefine.LOCAL_DISPLAY_WIDTH] = color;
+        GlobalValue.fillPixels[x + y * GlobalDefine.LOCAL_DISPLAY_WIDTH] = true;
     }
     public static void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color aColor) {
         if (aXStart > aXEnd) {

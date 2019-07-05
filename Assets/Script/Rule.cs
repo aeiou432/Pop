@@ -1,28 +1,57 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class RuleManager {
+    public static RuleManager Instance = new RuleManager();
+    public int RuleIndex;
+    private List<RuleBase> rulePool;
+    public RuleManager() {
+        this.rulePool = new List<RuleBase>();
+        this.rulePool.Add(new Rule1());
+        this.rulePool.Add(new Rule2());
+    }
+    public RuleBase RandomPickRule() {
+        this.RuleIndex = Random.Range(0, this.rulePool.Count);
+        RuleBase ruleBase = this.rulePool[this.RuleIndex];
+        ruleBase.Init();
+        return ruleBase;
+    }
+    public RuleBase JsonDeserialize(string data, int ruleNumber) {
+        switch(ruleNumber) {
+            case 0:
+                return JsonConvert.DeserializeObject<Rule1>(data);
+            case 1:
+                return JsonConvert.DeserializeObject<Rule2>(data);
+            default:
+                return null;
+        }
+    }
+}
 public abstract class RuleBase {
-    public List<Method> P;
+    [JsonIgnore] public List<Method> P;
     public List<float> R;
+    public abstract void Init();
 }
 
 public delegate void Method(InterNode node);
 public class Rule1 : RuleBase {
-    private int Branches = 2;
+    private int branches = 2;
     public float DivergencyA = 180;
     public List<float> A = new List<float>() { 10, 60 };
     
     public Rule1() {
+        this.P = new List<Method>() { this.P0, this.P1 };
+    }
+    public override void Init() {
         //this.R = new List<float>() { 0.9f, 0.7f };
         this.R = new List<float>() { Random.Range(0.9f, 0.95f), Random.Range(0.7f, 0.85f) };
         this.A[0] = Random.Range(5, 66);
         this.A[1] = 70 - this.A[0];
         this.DivergencyA = Random.Range(60, 300);
-        this.P = new List<Method>() { this.P0, this.P1 };
     }
     public void P0(InterNode node) {
-        for (int i = 0; i < this.Branches; i++) {
+        for (int i = 0; i < this.branches; i++) {
             InterNode tmp = new InterNode(node.maxHeight * this.R[i], node);
             tmp.Down(this.A[i], tmp);
             tmp.branchMethod = 1;
@@ -33,7 +62,7 @@ public class Rule1 : RuleBase {
         }
     }
     public void P1(InterNode node) {
-        for (int i = 0; i < this.Branches; i++) {
+        for (int i = 0; i < this.branches; i++) {
             InterNode tmp = new InterNode(node.maxHeight * this.R[i], node);
             tmp.branchMethod = 1;
             if (i == 1) {
@@ -53,6 +82,9 @@ public class Rule2 : RuleBase {
     public float DivergencyA = 137.5f;
     public List<float> A = new List<float>() { 45, 45 };
     public Rule2() {
+        this.P = new List<Method>() { this.P0, this.P1, this.P2 };
+    }
+    public override void Init() {
         //this.R = new List<float>() { 0.9f, 0.6f };
         this.R = new List<float>() { 0.9f, Random.Range(0.6f, 0.9f) };
         this.A[0] = Random.Range(20, 65);
@@ -67,7 +99,6 @@ public class Rule2 : RuleBase {
         if (Random.Range(0, 2) == 0) {
             this.DivergencyA = -this.DivergencyA;
         }
-        this.P = new List<Method>() { this.P0, this.P1, this.P2 };
     }
     public void P0(InterNode node) {
         InterNode tmp = new InterNode(node.maxHeight * this.R[1], node);

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using UnityEngine;
 using UnityEngine.Monetization;
 using UnityEngine.UI;
@@ -10,7 +9,6 @@ using UnityEngine.UI;
 public class Game : MonoBehaviour {
     public SpriteRenderer Tree;
     public Text Score;
-    public Text Sub;
     public AudioSource Audio;
     public List<AudioSource> Audio1;
     public List<AudioSource> Audio2;
@@ -20,10 +18,10 @@ public class Game : MonoBehaviour {
     public float LevelInterval = 10;
     public Button Play;
     public Button BackGround;
-    private List<Ball> Balls;
-    private List<Ball> BallPool;
-    private List<Bubble> Bubbles;
-    private List<Bubble> BubblePool;
+    private List<Ball> balls;
+    private List<Ball> ballPool;
+    private List<Bubble> bubbles;
+    private List<Bubble> bubblePool;
     private int maxLevel = 50;
     private int adthresholdNo = 300;
     private int numberOnce = 1;
@@ -39,6 +37,7 @@ public class Game : MonoBehaviour {
     private static string touchNumber = "number";
     private static string topHeight = "height";
     private static string subNumber = "subNumber";
+    private static string ruleIndex = "ruleIndex";
     private static string adShow = "adShow";
     private static string AndroidGameId = "3159824";
     private static string iOSGameId = "3159825";
@@ -52,17 +51,19 @@ public class Game : MonoBehaviour {
 #else
         Monetization.Initialize(iOSGameId, true);
 #endif
-        this.Balls = new List<Ball>();
-        this.BallPool = new List<Ball>();
-        this.Bubbles = new List<Bubble>();
-        this.BubblePool = new List<Bubble>();
+        this.balls = new List<Ball>();
+        this.ballPool = new List<Ball>();
+        this.bubbles = new List<Bubble>();
+        this.bubblePool = new List<Bubble>();
         this.nowAudio = this.Audio;
         this.dataPath = Application.persistentDataPath + "/save.txt";
         this.LoadData();
-
-        this.lTree = new LSystem();
-        this.lTree.Init();
-        //this.OnBackgroundClick();
+        if (this.lTree == null) {
+            this.lTree = new LSystem();
+            this.lTree.Init();
+        }
+        this.lTree.Draw();
+        this.OnBackgroundClick();
 
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
@@ -76,14 +77,14 @@ public class Game : MonoBehaviour {
         }
     }
     void Update() {
-        if (this.lTree.GrowNumber > 0 || Input.GetKeyUp(KeyCode.Mouse0)) {
+        /*if (this.lTree.GrowNumber > 0 || Input.GetKeyUp(KeyCode.Mouse0)) {
             this.lTree.Grow();
             this.ClearTexture();
             this.lTree.Draw();
             this.ApplyTexture();
             this.number++;
             this.Score.text = this.lTree.GrowNumber.ToString();
-        }
+        }*/
     }
 
     public void OnBackgroundClick() {
@@ -106,31 +107,25 @@ public class Game : MonoBehaviour {
             this.Score.text = "Top: " + this.topNumber.ToString();
             this.Score.gameObject.SetActive(active);
         }
-        if (GlobalValue.TreePixel > 0) {
-            this.Sub.text = "Tree: " + GlobalValue.TreePixel.ToString();
-            this.Sub.gameObject.SetActive(active);
-        }
     }
     private void PlayGame(ShowResult finishState) {
         this.Play.gameObject.SetActive(false);
         this.BackGround.gameObject.SetActive(false);
         this.Score.gameObject.SetActive(true);
-        this.Sub.gameObject.SetActive(true);
-        this.Sub.text = GlobalValue.TreePixel.ToString();
-        this.Score.text = this.number.ToString();
+        this.Score.text = this.lTree.GrowNumber.ToString();
         this.RandomCreate();
     }
     private void RandomCreate() {
         Ball ball;
         for (int i = 0; i < this.numberOnce; i++) {
-            if (this.BallPool.Count <= 0) {
+            if (this.ballPool.Count <= 0) {
                 ball = GameObject.Instantiate<Ball>(this.ResBall, this.transform);
                 ball.OnTouch.AddListener(this.Recycle);
                 ball.Boo.AddListener(this.Boo);
             }
             else {
-                ball = this.BallPool[0];
-                this.BallPool.RemoveAt(0);
+                ball = this.ballPool[0];
+                this.ballPool.RemoveAt(0);
             }
             ball.transform.SetAsFirstSibling();
             float screenRate = Screen.width / 720f;
@@ -139,14 +134,14 @@ public class Game : MonoBehaviour {
             float randomY = Random.Range(edge, Screen.height - edge);
             Vector2 touchPosition = new Vector2(randomX, randomY);
             ball.Reset(touchPosition);
-            this.Balls.Add(ball);
+            this.balls.Add(ball);
         }
     }
     private void Recycle(Ball ball) {
         this.PlaySound();
-        this.BallPool.Add(ball);
-        this.Balls.Remove(ball);
-        if (this.Balls.Count <= 0) {
+        this.ballPool.Add(ball);
+        this.balls.Remove(ball);
+        if (this.balls.Count <= 0) {
             this.nowLevelTimes++;
             if (this.nowLevelTimes >= 10 && this.numberOnce < this.maxLevel) {
                 this.numberOnce++;
@@ -176,10 +171,10 @@ public class Game : MonoBehaviour {
         this.nowAudio.Play();
     }
     private void Failed(Ball ball) {
-        for(int i = this.Balls.Count - 1; i >= 0 ; i--) {
-            this.Balls[i].End();
-            this.BallPool.Add(this.Balls[i]);
-            this.Balls.RemoveAt(i);
+        for(int i = this.balls.Count - 1; i >= 0 ; i--) {
+            this.balls[i].End();
+            this.ballPool.Add(this.balls[i]);
+            this.balls.RemoveAt(i);
         }
         if(this.number > this.topNumber) {
             this.topNumber = this.number;
@@ -193,49 +188,48 @@ public class Game : MonoBehaviour {
         //this.BackGround.gameObject.SetActive(true);
     }
     private void SaveDate() {
-        /*string save = JsonConvert.SerializeObject(this.treeStart);
+        string save = JsonConvert.SerializeObject(this.lTree);
+        string save1 = JsonConvert.SerializeObject(GlobalValue.Rule);
         PlayerPrefs.SetInt(touchNumber, this.topNumber);
-        PlayerPrefs.SetInt(topHeight, GlobalValue.MaxHeight);
-        PlayerPrefs.SetInt(subNumber, GlobalValue.TreePixel);
         PlayerPrefs.SetInt(adShow, this.showAd ? 1 : 0);
+        PlayerPrefs.SetInt(ruleIndex, GlobalValue.RuleIndex);
         using (StreamWriter sw = new StreamWriter(dataPath)) {
             sw.WriteLine(save);
-        }*/
+            sw.WriteLine(save1);
+        }
     }
     private void LoadData() {
-        /*if (File.Exists(dataPath)) {
+        if (File.Exists(dataPath)) {
+            this.topNumber = PlayerPrefs.GetInt(touchNumber, this.topNumber);
+            this.showAd = PlayerPrefs.GetInt(adShow, 0) == 1 ? true : false;
+            GlobalValue.RuleIndex = PlayerPrefs.GetInt(ruleIndex, 0);
             using (StreamReader sr = new StreamReader(dataPath)) {
                 string data = sr.ReadLine();
-                this.treeStart = JsonConvert.DeserializeObject<Block>(data);
+                string data1 = sr.ReadLine();
+                this.lTree = JsonConvert.DeserializeObject<LSystem>(data);
+                GlobalValue.Rule = RuleManager.Instance.JsonDeserialize(data1, GlobalValue.RuleIndex);
             }
-            if (this.treeStart != null) {
-                this.treeStart.Load();
-                GlobalValue.StartBlock = this.treeStart;
-            }
-            this.topNumber = PlayerPrefs.GetInt(touchNumber, this.topNumber);
-            GlobalValue.MaxHeight = PlayerPrefs.GetInt(topHeight, GlobalValue.MaxHeight);
-            GlobalValue.TreePixel = PlayerPrefs.GetInt(subNumber, GlobalValue.TreePixel);
-            this.showAd = PlayerPrefs.GetInt(adShow, 0) == 1 ? true : false;
-        }*/
+
+        }
     }
     private void Boo(Ball ball) {
-        this.BallPool.Add(ball);
-        this.Balls.Remove(ball);
+        this.ballPool.Add(ball);
+        this.balls.Remove(ball);
         this.StartCoroutine(this.CreateBubbles(ball.transform.position, 10));
     }
     private IEnumerator CreateBubbles(Vector3 position, int number) {
         Bubble bubble;
         for (int i = 0; i < number; i++) {
-            if (this.BubblePool.Count <= 0) {
+            if (this.bubblePool.Count <= 0) {
                 bubble = GameObject.Instantiate<Bubble>(this.ResBubble, this.transform);
                 bubble.OnTouch.AddListener(this.RecycleBubble);
             }
             else {
-                bubble = this.BubblePool[0];
-                this.BubblePool.RemoveAt(0);
+                bubble = this.bubblePool[0];
+                this.bubblePool.RemoveAt(0);
             }
             bubble.Begin(position);
-            this.Bubbles.Add(bubble);
+            this.bubbles.Add(bubble);
             
                 yield return new WaitForSeconds(0.01f);
 
@@ -243,15 +237,14 @@ public class Game : MonoBehaviour {
     }
     private void RecycleBubble(Bubble bubble) {
         this.number++;
-        this.Score.text = this.number.ToString();
         this.lTree.Grow();
         this.ClearTexture();
         this.lTree.Draw();
         this.ApplyTexture();
-        //this.Sub.text = GlobalValue.TreePixel.ToString();
-        this.BubblePool.Add(bubble);
-        this.Bubbles.Remove(bubble);
-        if(this.Bubbles.Count == 0) {
+        this.Score.text = this.lTree.GrowNumber.ToString();
+        this.bubblePool.Add(bubble);
+        this.bubbles.Remove(bubble);
+        if(this.bubbles.Count == 0) {
             this.RandomCreate();
         }
     }
@@ -260,14 +253,14 @@ public class Game : MonoBehaviour {
             if (GlobalValue.fillPixels[i]) {
                 GlobalValue.fillPixels[i] = false;
                 GlobalValue.pixels[i] = Color.clear;
-                this.Tree.sprite.texture.SetPixel(i % GrowDefine.LOCAL_DISPLAY_WIDTH, i / GrowDefine.LOCAL_DISPLAY_WIDTH, Color.clear);
+                this.Tree.sprite.texture.SetPixel(i % GlobalDefine.LOCAL_DISPLAY_WIDTH, i / GlobalDefine.LOCAL_DISPLAY_WIDTH, Color.clear);
             }
         }
     }
     private void ApplyTexture() {
         for (int i = 0; i < GlobalValue.fillPixels.Length; i++) {
             if (GlobalValue.fillPixels[i]) {
-                this.Tree.sprite.texture.SetPixel(i % GrowDefine.LOCAL_DISPLAY_WIDTH, i / GrowDefine.LOCAL_DISPLAY_WIDTH, GlobalValue.pixels[i]);
+                this.Tree.sprite.texture.SetPixel(i % GlobalDefine.LOCAL_DISPLAY_WIDTH, i / GlobalDefine.LOCAL_DISPLAY_WIDTH, GlobalValue.pixels[i]);
                 
             }
         }

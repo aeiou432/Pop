@@ -7,6 +7,7 @@ public class CustomButton : Button {
     public UnityEvent onMouseDownEvent;
     public UnityEvent onMouseUpEvent;
     public UnityEvent onPointerEnter;
+    public UnityEvent onPointerExit;
     public override void OnPointerDown(PointerEventData data) {
         base.OnPointerDown(data);
         this.onMouseDownEvent.Invoke();
@@ -18,5 +19,9 @@ public class CustomButton : Button {
     public override void OnPointerEnter(PointerEventData data) {
         base.OnPointerEnter(data);
         this.onPointerEnter.Invoke();
+    }
+    public override void OnPointerExit(PointerEventData data) {
+        base.OnPointerExit(data);
+        this.onPointerExit.Invoke();
     }
 }
