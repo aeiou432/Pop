@@ -4,10 +4,10 @@ using UnityEngine.Events;
 public class BallEvent : UnityEvent<Ball> { }
 public class Ball : MonoBehaviour {
     public BallEvent Boo = new BallEvent();
-    public BallEvent OnTouch = new BallEvent();
     public CustomButton Button;
     public AudioSource Audio;
     public AudioSource Audio1;
+    public BallData data;
     private float time;
     private bool enable;
     private float stackTime;
@@ -58,11 +58,12 @@ public class Ball : MonoBehaviour {
         this.enable = false;
     }
 
-    public void Reset(Vector2 position) {
-        this.GetComponent<RectTransform>().anchoredPosition = position;
+    public void Reset(BallData data) {
+        this.data = data;
+        this.GetComponent<RectTransform>().anchoredPosition = data.Pos ;
         this.transform.localScale = Vector3.one;
         this.time = Time.time;
-        this.transform.position = position;
+        this.transform.position = data.Pos;
         this.Button.gameObject.SetActive(true);
         this.playAudio = true;
     }

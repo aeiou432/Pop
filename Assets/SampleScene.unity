@@ -1859,7 +1859,7 @@ GameObject:
   - component: {fileID: 1103092277}
   - component: {fileID: 1103092276}
   m_Layer: 5
-  m_Name: Score
+  m_Name: Number
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1917,7 +1917,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Top: 99999'
+  m_Text: 99999
 --- !u!222 &1103092277
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2042,7 +2042,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1265881632
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3160,7 +3160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Tree: {fileID: 393865375}
-  Score: {fileID: 1103092276}
+  Number: {fileID: 1103092276}
   Audio: {fileID: 235656333}
   Audio1:
   - {fileID: 1282182070}
@@ -3173,6 +3173,5 @@ MonoBehaviour:
   - {fileID: 137998279}
   ResBall: {fileID: 924320545}
   ResBubble: {fileID: 126705639}
-  LevelInterval: 10
   Play: {fileID: 1550333822}
   BackGround: {fileID: 1299659747}

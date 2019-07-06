@@ -18,11 +18,10 @@ public class Ball1 : MonoBehaviour {
         }
     }
     public void HoverIn() {
-        this.vibrateTime = Time.time + 1f;
+        this.vibrateTime = Time.time + 0.07f;
         Vibration.Vibrate(1000);
         this.Vibrate.Play("Vibrate", 0, 0);
     }
     public void HoverOut() {
-        this.vibrateTime = Time.time + 0.1f;
     }
 }

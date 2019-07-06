@@ -9,11 +9,8 @@ ScriptsOnlyBuild:
     UnityEditor.Graphs.dll:
     - UnityEditor.Graphs.AnimationBlendTree.Graph
     - UnityEditor.Graphs.AnimationBlendTree.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.AnyStateNode
     - UnityEditor.Graphs.AnimationStateMachine.Graph
     - UnityEditor.Graphs.AnimationStateMachine.GraphGUI
-    - UnityEditor.Graphs.AnimationStateMachine.StateMachineNode
-    - UnityEditor.Graphs.AnimationStateMachine.StateNode
     - UnityEditor.Graphs.AnimatorControllerTool
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.TestListCacheData
@@ -80,9 +77,9 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 9940}
     - Class: 114
-      Script: {instanceID: 9972}
+      Script: {instanceID: 9944}
     - Class: 114
-      Script: {instanceID: 23638}
+      Script: {instanceID: 9974}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -624,6 +621,12 @@ ScriptsOnlyBuild:
     className: Game
   - hash:
       serializedVersion: 2
+      Hash: b7bf64a2b46b9d03c8540a6caf2fe394
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: Ball1
+  - hash:
+      serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
@@ -784,12 +787,6 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: PlayableTrack
-  - hash:
-      serializedVersion: 2
-      Hash: b7bf64a2b46b9d03c8540a6caf2fe394
-    assemblyName: Assembly-CSharp.dll
-    namespaceName: 
-    className: Ball1
   platform: 13
   scenePathNames:
   - Assets/SampleScene.unity
