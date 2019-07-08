@@ -12,7 +12,7 @@ public class RuleManager {
         this.rulePool.Add(new Rule2());
     }
     public RuleBase RandomPickRule() {
-        this.RuleIndex = Random.Range(0, this.rulePool.Count);
+        this.RuleIndex = UnityEngine.Random.Range(0, this.rulePool.Count);
         RuleBase ruleBase = this.rulePool[this.RuleIndex];
         ruleBase.Init();
         return ruleBase;
@@ -45,10 +45,10 @@ public class Rule1 : RuleBase {
     }
     public override void Init() {
         //this.R = new List<float>() { 0.9f, 0.7f };
-        this.R = new List<float>() { Random.Range(0.9f, 0.95f), Random.Range(0.7f, 0.85f) };
-        this.A[0] = Random.Range(5, 66);
+        this.R = new List<float>() { UnityEngine.Random.Range(0.9f, 0.95f), UnityEngine.Random.Range(0.7f, 0.85f) };
+        this.A[0] = UnityEngine.Random.Range(5, 66);
         this.A[1] = 70 - this.A[0];
-        this.DivergencyA = Random.Range(60, 300);
+        this.DivergencyA = UnityEngine.Random.Range(60, 300);
     }
     public void P0(InterNode node) {
         for (int i = 0; i < this.branches; i++) {
@@ -86,17 +86,17 @@ public class Rule2 : RuleBase {
     }
     public override void Init() {
         //this.R = new List<float>() { 0.9f, 0.6f };
-        this.R = new List<float>() { 0.9f, Random.Range(0.6f, 0.9f) };
-        this.A[0] = Random.Range(20, 65);
-        if (Random.Range(0, 2) == 0) {
+        this.R = new List<float>() { 0.9f, UnityEngine.Random.Range(0.6f, 0.9f) };
+        this.A[0] = UnityEngine.Random.Range(20, 65);
+        if (UnityEngine.Random.Range(0, 2) == 0) {
             this.A[0] = -this.A[0];
         }
-        this.A[1] = Random.Range(20, 65);
-        if (Random.Range(0, 2) == 0) {
+        this.A[1] = UnityEngine.Random.Range(20, 65);
+        if (UnityEngine.Random.Range(0, 2) == 0) {
             this.A[1] = -this.A[1];
         }
-        this.DivergencyA = Random.Range(50, 170);
-        if (Random.Range(0, 2) == 0) {
+        this.DivergencyA = UnityEngine.Random.Range(50, 170);
+        if (UnityEngine.Random.Range(0, 2) == 0) {
             this.DivergencyA = -this.DivergencyA;
         }
     }

@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class GlobalDefine {
     public static float W = 0.707f;
     public static int MaxLevel = 9;
+    public static int TimeInterval = 50;
     public static int LOCAL_DISPLAY_WIDTH = 600;
     public static int LOCAL_DISPLAY_HEIGHT = 1000;
 
@@ -91,6 +93,16 @@ public class InterNode {
         }
         this.subs[this.subs.Count - 1].Draw(endPoint, subWidth);
     }
+    public void SetTopLevel() {
+        if (this.level > GlobalValue.TopLevel) {
+            GlobalValue.TopLevel = this.level;
+        }
+        if (this.subs != null) {
+            for (int i = 0; i < this.subs.Count; i++) {
+                this.subs[i].SetTopLevel();
+            }
+        }
+    }
 }
 public class LSystem {
     [JsonProperty] private InterNode node;
@@ -110,11 +122,8 @@ public class LSystem {
     public void Draw() {
         this.node.Draw(this.nodeStart, GlobalValue.TopLevel * 1.5f + 1);
     }
-    public string GetJsonData() {
-        return JsonConvert.SerializeObject(this.node);
-    }
-    public void LoadJsonData(string data) {
-        this.node = JsonConvert.DeserializeObject<InterNode>(data);
+    public void SetTopLevel() {
+        this.node.SetTopLevel();
     }
     private void CountGrowNumber() {
         int total = 0;

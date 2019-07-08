@@ -19,9 +19,9 @@ public class Bubble : MonoBehaviour {
     void Start() {
         //this.target = this.transform.localPosition;
         Animator bubbleRotate = this.Button.GetComponent<Animator>();
-        bubbleRotate.speed = Random.Range(0f, 1f);
+        bubbleRotate.speed = UnityEngine.Random.Range(0f, 1f);
         this.Button.onPointerEnter.AddListener(this.Hover);
-        if (Random.Range(0, 2) == 1) {
+        if (UnityEngine.Random.Range(0, 2) == 1) {
             this.Button.image.sprite = this.Bubble2;
             bubbleRotate.Play("bubble1");
         }
@@ -29,18 +29,18 @@ public class Bubble : MonoBehaviour {
     public void Begin(Vector3 start) {
         this.gameObject.SetActive(true);
         this.Button.interactable = true;
-        float scale = Random.Range(1f, 1.5f);
+        float scale = UnityEngine.Random.Range(1f, 1.5f);
         this.Button.transform.localScale = new Vector3(scale, scale, 1);
         this.enableTime = Time.time + 0.1f;
         this.Button.gameObject.SetActive(true);
         this.Button.image.raycastTarget = true;
         this.transform.position = start;
-        float x = Random.Range(-150f, 150f);
-        float y = Random.Range(-50, 50f);
+        float x = UnityEngine.Random.Range(-150f, 150f);
+        float y = UnityEngine.Random.Range(-50, 50f);
         this.target = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
         this.target.x += x;
         this.target.y += y;
-        //this.Audio1.PlayDelayed(Random.Range(0, 0.1f));
+        //this.Audio1.PlayDelayed(UnityEngine.Random.Range(0, 0.1f));
         this.Audio1.Play();
         this.Light.SetActive(false);
     }

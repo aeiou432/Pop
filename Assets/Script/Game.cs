@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +14,8 @@ public class BallData {
     public void SetRandomData() {
         float screenRate = Screen.width / 720f;
         float edge = screenRate * 150f;
-        float randomX = Random.Range(edge, Screen.width - edge);
-        float randomY = Random.Range(edge, Screen.height - edge);
+        float randomX = UnityEngine.Random.Range(edge, Screen.width - edge);
+        float randomY = UnityEngine.Random.Range(edge, Screen.height - edge);
         Vector2 touchPosition = new Vector2(randomX, randomY);
         this.Pos = touchPosition;
         this.Enable = true;
@@ -23,6 +24,7 @@ public class BallData {
 public class Game : MonoBehaviour {
     public SpriteRenderer Tree;
     public Text Number;
+    public Text LeftTime;
     public AudioSource Audio;
     public List<AudioSource> Audio1;
     public List<AudioSource> Audio2;
@@ -37,14 +39,17 @@ public class Game : MonoBehaviour {
     private List<Bubble> bubbles;
     private List<Bubble> bubblePool;
     private int adthresholdNo = 300;
-    private int numberOnce = 1;
+    private int numberOnce = 5;
+    private int bubbleNumber = 10;
+    
     private bool showAd;
     private int audioIndex1;
     private int audioIndex2;
     private int audioIndex3;
-    private float nextTime;
+    private DateTime nextTime;
     private AudioSource nowAudio;
     private static string ruleIndex = "ruleIndex";
+    private static string nextDateTime = "nextDateTime";
     private static string adShow = "adShow";
     private static string AndroidGameId = "3159824";
     private static string iOSGameId = "3159825";
@@ -68,6 +73,9 @@ public class Game : MonoBehaviour {
         if (this.lTree == null) {
             this.lTree = new LSystem();
             this.lTree.Init();
+        }
+        else {
+            this.lTree.SetTopLevel();
         }
         this.lTree.Draw();
         if (this.ballDatas == null) {
@@ -126,7 +134,30 @@ public class Game : MonoBehaviour {
         this.Number.text = this.lTree.GrowNumber.ToString();
         for (int i = 0; i < this.ballDatas.Count; i++) {
             this.ShowBall(this.ballDatas[i]);
-        } 
+        }
+        if (this.balls.Count < this.numberOnce) {
+            this.StartCoroutine(this.CheckTime());
+        }
+        else {
+            this.LeftTime.gameObject.SetActive(false);
+        }
+    }
+    private IEnumerator CheckTime() {
+        this.LeftTime.gameObject.SetActive(true);
+        while (true) {
+            DateTime time = DateTime.UtcNow;
+            while (time >= this.nextTime) {
+                this.RandomCreateBallData();
+                if (this.balls.Count >= this.numberOnce) {
+                    this.LeftTime.gameObject.SetActive(false);
+                    yield break;
+                }
+                this.nextTime = this.nextTime.AddSeconds(GlobalDefine.TimeInterval);
+            }
+            TimeSpan span = this.nextTime - time;
+            this.LeftTime.text = span.Minutes + ":" + span.Seconds.ToString("00");
+            yield return new WaitForSeconds(1);
+        }
     }
     public void ShowBall(BallData data) {
         if (!data.Enable) return;
@@ -156,26 +187,31 @@ public class Game : MonoBehaviour {
         this.nowAudio.Play();
     }
     private void SaveDate() {
-        string save = JsonConvert.SerializeObject(this.lTree);
-        string save1 = JsonConvert.SerializeObject(GlobalValue.Rule);
+        PlayerPrefs.SetString(nextDateTime, this.nextTime.ToString());
         PlayerPrefs.SetInt(adShow, this.showAd ? 1 : 0);
         PlayerPrefs.SetInt(ruleIndex, GlobalValue.RuleIndex);
         using (StreamWriter sw = new StreamWriter(dataPath)) {
+            string save = JsonConvert.SerializeObject(this.lTree);
             sw.WriteLine(save);
-            sw.WriteLine(save1);
+            save = JsonConvert.SerializeObject(GlobalValue.Rule);
+            sw.WriteLine(save);
+            save = JsonConvert.SerializeObject(this.ballDatas);
+            sw.WriteLine(save);
         }
     }
     private void LoadData() {
         if (File.Exists(dataPath)) {
+            this.nextTime = Convert.ToDateTime(PlayerPrefs.GetString(nextDateTime));
             this.showAd = PlayerPrefs.GetInt(adShow, 0) == 1 ? true : false;
             GlobalValue.RuleIndex = PlayerPrefs.GetInt(ruleIndex, 0);
             using (StreamReader sr = new StreamReader(dataPath)) {
                 string data = sr.ReadLine();
-                string data1 = sr.ReadLine();
                 this.lTree = JsonConvert.DeserializeObject<LSystem>(data);
-                GlobalValue.Rule = RuleManager.Instance.JsonDeserialize(data1, GlobalValue.RuleIndex);
+                data = sr.ReadLine();
+                GlobalValue.Rule = RuleManager.Instance.JsonDeserialize(data, GlobalValue.RuleIndex);
+                data = sr.ReadLine();
+                this.ballDatas = JsonConvert.DeserializeObject<List<BallData>>(data);
             }
-
         }
     }
     private void Boo(Ball ball) {
@@ -183,7 +219,12 @@ public class Game : MonoBehaviour {
         ball.data = null;
         this.ballPool.Add(ball);
         this.balls.Remove(ball);
-        this.StartCoroutine(this.CreateBubbles(ball.transform.position, 10));
+        if (this.balls.Count == this.numberOnce - 1) {
+            this.StopCoroutine(this.CheckTime());
+            this.nextTime = DateTime.UtcNow.AddSeconds(GlobalDefine.TimeInterval);
+            this.StartCoroutine(this.CheckTime());
+        }
+        this.StartCoroutine(this.CreateBubbles(ball.transform.position, this.bubbleNumber));
     }
     private IEnumerator CreateBubbles(Vector3 position, int number) {
         Bubble bubble;
@@ -209,9 +250,6 @@ public class Game : MonoBehaviour {
         this.Number.text = this.lTree.GrowNumber.ToString();
         this.bubblePool.Add(bubble);
         this.bubbles.Remove(bubble);
-        if(this.bubbles.Count == 0) {
-            this.RandomCreateBallData();
-        }
     }
     private void ClearTexture() {
         for (int i = 0; i < GlobalValue.fillPixels.Length; i++) {
