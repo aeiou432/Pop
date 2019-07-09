@@ -31,6 +31,7 @@ public class RuleManager {
 public abstract class RuleBase {
     [JsonIgnore] public List<Method> P;
     public List<float> R;
+    public bool DrawAxis; // x: true, z: false
     public abstract void Init();
 }
 
@@ -49,6 +50,7 @@ public class Rule1 : RuleBase {
         this.A[0] = UnityEngine.Random.Range(5, 66);
         this.A[1] = 70 - this.A[0];
         this.DivergencyA = UnityEngine.Random.Range(60, 300);
+        this.DrawAxis = (UnityEngine.Random.Range(0, 2) == 0) ? true : false;
     }
     public void P0(InterNode node) {
         for (int i = 0; i < this.branches; i++) {
@@ -99,6 +101,7 @@ public class Rule2 : RuleBase {
         if (UnityEngine.Random.Range(0, 2) == 0) {
             this.DivergencyA = -this.DivergencyA;
         }
+        this.DrawAxis = (UnityEngine.Random.Range(0, 2) == 0) ? true : false;
     }
     public void P0(InterNode node) {
         InterNode tmp = new InterNode(node.maxHeight * this.R[1], node);

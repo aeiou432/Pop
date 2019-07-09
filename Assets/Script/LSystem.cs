@@ -6,10 +6,11 @@ using UnityEngine;
 public static class GlobalDefine {
     public static float W = 0.707f;
     public static int MaxLevel = 9;
-    public static int TimeInterval = 50;
+    public static int TimeInterval = 20;
+    public static float DrawPoint = 300;
     public static int LOCAL_DISPLAY_WIDTH = 600;
     public static int LOCAL_DISPLAY_HEIGHT = 1000;
-
+    public static string ResBallPath = "Assets/Prefabs/";
 }
 public static class GlobalValue {
     public static int TopLevel;
@@ -83,7 +84,18 @@ public class InterNode {
     }
     public void Draw(Vector3 startPoint, float width) {
         Vector3 endPoint = startPoint + this.angleVector * this.height;
-        DrawLine.DrawThickLine(Mathf.RoundToInt(startPoint.x), Mathf.RoundToInt(-startPoint.y), Mathf.RoundToInt(endPoint.x), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width), ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
+        float startPointX, endPointX;
+        if (GlobalValue.Rule.DrawAxis) {
+            startPointX = startPoint.x;
+            endPointX = endPoint.x;
+        }
+        else {
+            startPointX = startPoint.z;
+            endPointX = endPoint.z;
+        }
+        DrawLine.DrawThickLine(Mathf.RoundToInt(startPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-startPoint.y),
+                Mathf.RoundToInt(endPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width),
+                ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
         float subWidth = width * GlobalDefine.W;
         if (this.subs == null) {
             return;
@@ -106,7 +118,7 @@ public class InterNode {
 }
 public class LSystem {
     [JsonProperty] private InterNode node;
-    private Vector3 nodeStart = new Vector3(300, 0, 0);
+    private Vector3 nodeStart = Vector3.zero;
     private int length = 150;
     public int GrowNumber;
     public void Init() {

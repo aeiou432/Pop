@@ -8,7 +8,7 @@ using UnityEngine.Monetization;
 using UnityEngine.UI;
 
 public class BallData {
-    public int Type;
+    public BallType Type;
     public Vector2 Pos;
     public bool Enable;
     public void SetRandomData() {
@@ -22,6 +22,7 @@ public class BallData {
     }
 }
 public class Game : MonoBehaviour {
+    public BallManager BallManager;
     public SpriteRenderer Tree;
     public Text Number;
     public Text LeftTime;
@@ -29,18 +30,18 @@ public class Game : MonoBehaviour {
     public List<AudioSource> Audio1;
     public List<AudioSource> Audio2;
     public List<AudioSource> Audio3;
-    public Ball ResBall;
+    public Ball0 ResBall;
     public Bubble ResBubble;
-    public Button Play;
+    public Button Reset;
     public Button BackGround;
+    public GameObject UIObj;
     private List<BallData> ballDatas;
-    private List<Ball> balls;
-    private List<Ball> ballPool;
+    private List<BallBase> balls;
     private List<Bubble> bubbles;
     private List<Bubble> bubblePool;
     private int adthresholdNo = 300;
     private int numberOnce = 5;
-    private int bubbleNumber = 10;
+    private int bubbleNumber = 100;
     
     private bool showAd;
     private int audioIndex1;
@@ -63,8 +64,7 @@ public class Game : MonoBehaviour {
 #else
         Monetization.Initialize(iOSGameId, true);
 #endif
-        this.balls = new List<Ball>();
-        this.ballPool = new List<Ball>();
+        this.balls = new List<BallBase>();
         this.bubbles = new List<Bubble>();
         this.bubblePool = new List<Bubble>();
         this.nowAudio = this.Audio;
@@ -87,9 +87,9 @@ public class Game : MonoBehaviour {
             }
         }
         this.OnBackgroundClick();
-
         this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
         this.Tree.sprite.texture.Apply();
+        this.PlayGame();
     }
     public void OnApplicationQuit() {
         this.SaveDate();
@@ -111,27 +111,37 @@ public class Game : MonoBehaviour {
     }
 
     public void OnBackgroundClick() {
-        if (this.showAd && Monetization.IsReady(AdName)) {
+        this.UIObj.gameObject.SetActive(true);
+        this.BackGround.gameObject.SetActive(false);
+        for (int i = 0; i < this.balls.Count; i++) {
+            this.balls[i].gameObject.SetActive(true);
+        }
+    }
+    public void OnResetClick() {
+        this.lTree.Init();
+        this.ClearTexture();
+        this.lTree.Draw();
+        this.ApplyTexture();
+        GlobalValue.TopLevel = 0;
+        this.HideOrShowNumberAndReset();
+    }
+    public void OnHideClick() {
+        this.UIObj.gameObject.SetActive(false);
+        this.BackGround.gameObject.SetActive(true);
+        for (int i = 0; i < this.balls.Count; i++) {
+            this.balls[i].gameObject.SetActive(false);
+        }
+    }
+    private void ShowAd() {
+        /*if (this.showAd && Monetization.IsReady(AdName)) {
             ShowAdPlacementContent adContent = Monetization.GetPlacementContent(AdName) as ShowAdPlacementContent;
             adContent.Show(this.BackGroundCB);
             this.showAd = false;
-        }
-        else {
-            this.BackGroundCB(ShowResult.Finished);
-        }
+        }*/
     }
-    public void OnPlayClick() {
-        this.PlayGame(ShowResult.Finished);
-    }
-    private void BackGroundCB(ShowResult finishState) {
-        bool active = !this.Play.gameObject.activeSelf;
-        this.Play.gameObject.SetActive(active);
-    }
-    private void PlayGame(ShowResult finishState) {
-        this.Play.gameObject.SetActive(false);
+    private void PlayGame() {
         this.BackGround.gameObject.SetActive(false);
-        this.Number.gameObject.SetActive(true);
-        this.Number.text = this.lTree.GrowNumber.ToString();
+        this.HideOrShowNumberAndReset();
         for (int i = 0; i < this.ballDatas.Count; i++) {
             this.ShowBall(this.ballDatas[i]);
         }
@@ -155,23 +165,13 @@ public class Game : MonoBehaviour {
                 this.nextTime = this.nextTime.AddSeconds(GlobalDefine.TimeInterval);
             }
             TimeSpan span = this.nextTime - time;
-            this.LeftTime.text = span.Minutes + ":" + span.Seconds.ToString("00");
+            this.LeftTime.text = span.Minutes + ":" + (span.Seconds + 1).ToString("00");
             yield return new WaitForSeconds(1);
         }
     }
     public void ShowBall(BallData data) {
         if (!data.Enable) return;
-        Ball ball;
-        if (this.ballPool.Count <= 0) {
-            ball = GameObject.Instantiate<Ball>(this.ResBall, this.transform);
-            ball.Boo.AddListener(this.Boo);
-        }
-        else {
-            ball = this.ballPool[0];
-            this.ballPool.RemoveAt(0);
-        }
-        ball.transform.SetAsFirstSibling();
-        ball.Reset(data);
+        BallBase ball = this.BallManager.GetBall(data, this.Boo);
         this.balls.Add(ball);
     }
     private void RandomCreateBallData() {
@@ -214,10 +214,8 @@ public class Game : MonoBehaviour {
             }
         }
     }
-    private void Boo(Ball ball) {
-        ball.data.Enable = false;
-        ball.data = null;
-        this.ballPool.Add(ball);
+    private void Boo(BallBase ball) {
+        this.BallManager.Recycle(ball);
         this.balls.Remove(ball);
         if (this.balls.Count == this.numberOnce - 1) {
             this.StopCoroutine(this.CheckTime());
@@ -243,13 +241,26 @@ public class Game : MonoBehaviour {
         }
     }
     private void RecycleBubble(Bubble bubble) {
-        this.lTree.Grow();
-        this.ClearTexture();
-        this.lTree.Draw();
-        this.ApplyTexture();
-        this.Number.text = this.lTree.GrowNumber.ToString();
+        if (this.lTree.GrowNumber > 0) {
+            this.lTree.Grow();
+            this.ClearTexture();
+            this.lTree.Draw();
+            this.ApplyTexture();
+            this.HideOrShowNumberAndReset();
+        }
         this.bubblePool.Add(bubble);
         this.bubbles.Remove(bubble);
+    }
+    private void HideOrShowNumberAndReset() {
+        if (this.lTree.GrowNumber > 0) {
+            this.Reset.gameObject.SetActive(false);
+            this.Number.gameObject.SetActive(true);
+            this.Number.text = this.lTree.GrowNumber.ToString();
+        }
+        else {
+            this.Reset.gameObject.SetActive(true);
+            this.Number.gameObject.SetActive(false);
+        }
     }
     private void ClearTexture() {
         for (int i = 0; i < GlobalValue.fillPixels.Length; i++) {

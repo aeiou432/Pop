@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Ball1 : MonoBehaviour {
-    public CustomButton Button;
+public class Ball1 : BallBase {
     public Animator Vibrate;
     private float vibrateTime;
     public void Start() {
