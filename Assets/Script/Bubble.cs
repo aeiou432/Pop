@@ -5,17 +5,22 @@ using UnityEngine.UI;
 public class BubbleEvent : UnityEvent<Bubble> { }
 public class Bubble : MonoBehaviour {
     public BubbleEvent OnTouch = new BubbleEvent();
+    public BubbleEvent OnMiss = new BubbleEvent();
     public CustomButton Button;
     public AudioSource Audio;
     public AudioSource Audio1;
     public GameObject Light;
     public Sprite Bubble2;
     private Vector3 target;
-    private float smooth = 0.5f;
+    private float smooth = 1f;
     private float enableTime;
     private float endTime;
     private float lightingTime;
     private Vector3 velocity;
+    private bool startFloat;
+    private float floatTime;
+    private Vector2 floatVelocity;
+    private float missTime;
     void Start() {
         //this.target = this.transform.localPosition;
         Animator bubbleRotate = this.Button.GetComponent<Animator>();
@@ -36,18 +41,41 @@ public class Bubble : MonoBehaviour {
         this.Button.image.raycastTarget = true;
         this.transform.position = start;
         float x = UnityEngine.Random.Range(-150f, 150f);
-        float y = UnityEngine.Random.Range(-50, 50f);
+        float y = UnityEngine.Random.Range(-50, 150f);
         this.target = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, this.transform.localPosition.z);
         this.target.x += x;
         this.target.y += y;
+        this.startFloat = false;
         //this.Audio1.PlayDelayed(UnityEngine.Random.Range(0, 0.1f));
         this.Audio1.Play();
         this.Light.SetActive(false);
     }
     public void Update() {
         if (this.Button.IsInteractable()) {
-            this.transform.localPosition = Vector3.Lerp(this.transform.localPosition, this.target, this.smooth * Time.deltaTime);
+            if (!this.startFloat) {
+                this.transform.localPosition = Vector3.Lerp(this.transform.localPosition, this.target, this.smooth * Time.deltaTime);
+                if (Vector3.Distance(this.transform.localPosition, this.target) < 0.5) {
+                    this.startFloat = true;
+                    this.missTime = Time.time + 30;
+                }
+            }
+            else {
+                if (Time.time > this.missTime) {
+                    this.gameObject.SetActive(false);
+                    this.OnMiss.Invoke(this);
+                }
+                if (Time.time > this.floatTime) {
+                    this.floatTime = Time.time + 5;
+                    this.floatVelocity.x = Random.Range(-5, 5);
+                    this.floatVelocity.y = Random.Range(1, 15);
+                }
+                Vector3 pos = this.transform.localPosition;
+                pos.x += (floatVelocity.x * Time.deltaTime);
+                pos.y += (floatVelocity.y * Time.deltaTime);
+                this.transform.localPosition = pos;
+            }
         }
+
         if (this.endTime != 0 && Time.time > this.endTime) {
             this.endTime = 0;
             this.Button.gameObject.SetActive(false);

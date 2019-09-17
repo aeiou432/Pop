@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Monetization;
+using UnityEngine.Profiling;
 using UnityEngine.UI;
 
 public class BallData {
@@ -24,6 +25,7 @@ public class BallData {
 public class Game : MonoBehaviour {
     public BallManager BallManager;
     public SpriteRenderer Tree;
+    public SpriteRenderer Line;
     public Text Number;
     public Text LeftTime;
     public AudioSource Audio;
@@ -41,7 +43,8 @@ public class Game : MonoBehaviour {
     private List<Bubble> bubblePool;
     private int adthresholdNo = 300;
     private int numberOnce = 5;
-    private int bubbleNumber = 100;
+    private int bubbleNumber = 50;
+    private bool textureUpdate = false;
     
     private bool showAd;
     private int audioIndex1;
@@ -77,7 +80,6 @@ public class Game : MonoBehaviour {
         else {
             this.lTree.SetTopLevel();
         }
-        this.lTree.Draw();
         if (this.ballDatas == null) {
             this.ballDatas = new List<BallData>();
             for (int i = 0; i < this.numberOnce; i++) {
@@ -87,8 +89,8 @@ public class Game : MonoBehaviour {
             }
         }
         this.OnBackgroundClick();
-        this.Tree.sprite.texture.SetPixels(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();
+        this.lTree.Draw();
+        this.ApplyTexture();
         this.PlayGame();
     }
     public void OnApplicationQuit() {
@@ -99,17 +101,15 @@ public class Game : MonoBehaviour {
             this.SaveDate();
         }
     }
-    void Update() {
-        /*if (this.lTree.GrowNumber > 0 || Input.GetKeyUp(KeyCode.Mouse0)) {
-            this.lTree.Grow();
+    public void FixedUpdate() {
+        if (this.textureUpdate) {
             this.ClearTexture();
             this.lTree.Draw();
             this.ApplyTexture();
-            this.number++;
-            this.Score.text = this.lTree.GrowNumber.ToString();
-        }*/
+            this.HideOrShowNumberAndReset();
+            this.textureUpdate = false;
+        }
     }
-
     public void OnBackgroundClick() {
         this.UIObj.gameObject.SetActive(true);
         this.BackGround.gameObject.SetActive(false);
@@ -229,7 +229,8 @@ public class Game : MonoBehaviour {
         for (int i = 0; i < number; i++) {
             if (this.bubblePool.Count <= 0) {
                 bubble = GameObject.Instantiate<Bubble>(this.ResBubble, this.transform);
-                bubble.OnTouch.AddListener(this.RecycleBubble);
+                bubble.OnTouch.AddListener(this.BubbleBoo);
+                bubble.OnMiss.AddListener(this.RecycleBubble);
             }
             else {
                 bubble = this.bubblePool[0];
@@ -237,23 +238,24 @@ public class Game : MonoBehaviour {
             }
             bubble.Begin(position);
             this.bubbles.Add(bubble);
-            yield return new WaitForSeconds(0.01f);
+            //yield return new WaitForSeconds(0.01f);
         }
+        yield return new WaitForSeconds(0.01f);
     }
     private void RecycleBubble(Bubble bubble) {
-        if (this.lTree.GrowNumber > 0) {
-            this.lTree.Grow();
-            this.ClearTexture();
-            this.lTree.Draw();
-            this.ApplyTexture();
-            this.HideOrShowNumberAndReset();
-        }
         this.bubblePool.Add(bubble);
         this.bubbles.Remove(bubble);
     }
+    private void BubbleBoo(Bubble bubble) {
+        if (this.lTree.GrowNumber > 0) {
+            this.lTree.Grow();
+            this.textureUpdate = true;
+        }
+        this.RecycleBubble(bubble);
+    }
     private void HideOrShowNumberAndReset() {
         if (this.lTree.GrowNumber > 0) {
-            this.Reset.gameObject.SetActive(false);
+            //this.Reset.gameObject.SetActive(false);
             this.Number.gameObject.SetActive(true);
             this.Number.text = this.lTree.GrowNumber.ToString();
         }
@@ -265,19 +267,13 @@ public class Game : MonoBehaviour {
     private void ClearTexture() {
         for (int i = 0; i < GlobalValue.fillPixels.Length; i++) {
             if (GlobalValue.fillPixels[i]) {
-                GlobalValue.fillPixels[i] = false;
-                GlobalValue.pixels[i] = Color.clear;
-                this.Tree.sprite.texture.SetPixel(i % GlobalDefine.LOCAL_DISPLAY_WIDTH, i / GlobalDefine.LOCAL_DISPLAY_WIDTH, Color.clear);
+                GlobalValue.pixels[i] = GlobalDefine.Black;
             }
         }
+        GlobalValue.fillPixels.Initialize();
     }
     private void ApplyTexture() {
-        for (int i = 0; i < GlobalValue.fillPixels.Length; i++) {
-            if (GlobalValue.fillPixels[i]) {
-                this.Tree.sprite.texture.SetPixel(i % GlobalDefine.LOCAL_DISPLAY_WIDTH, i / GlobalDefine.LOCAL_DISPLAY_WIDTH, GlobalValue.pixels[i]);
-                
-            }
-        }
-        this.Tree.sprite.texture.Apply(true);
+        this.Tree.sprite.texture.SetPixels32(GlobalValue.pixels);
+        this.Tree.sprite.texture.Apply();
     }
 }

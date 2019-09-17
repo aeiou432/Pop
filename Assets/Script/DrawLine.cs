@@ -12,7 +12,7 @@ public enum ThicknessMod {
 }
 public static class DrawLine {
     public static void DrawThickLine(int aXStart, int aYStart, int aXEnd, int aYEnd, int aThickness,
-        ThicknessMod aThicknessMode, Color aColor) {
+        ThicknessMod aThicknessMode, Color32 aColor) {
         int i, tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
 
         if (aThickness <= 1) {
@@ -190,7 +190,7 @@ public static class DrawLine {
         }
     }
     public static void DrawLineOverlap(int aXStart, int aYStart, int aXEnd, int aYEnd, Overlap aOverlap,
-        Color aColor) {
+        Color32 aColor) {
         int tDeltaX, tDeltaY, tDeltaXTimes2, tDeltaYTimes2, tError, tStepX, tStepY;
         /*
          * Clip to display size
@@ -291,11 +291,11 @@ public static class DrawLine {
             }
         }
     }
-    public static void DrawPixel(int x, int y, Color color) {
+    public static void DrawPixel(int x, int y, Color32 color) {
         GlobalValue.pixels[x + y * GlobalDefine.LOCAL_DISPLAY_WIDTH] = color;
         GlobalValue.fillPixels[x + y * GlobalDefine.LOCAL_DISPLAY_WIDTH] = true;
     }
-    public static void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color aColor) {
+    public static void FillRect(int aXStart, int aYStart, int aXEnd, int aYEnd, Color32 aColor) {
         if (aXStart > aXEnd) {
             int tmp = aXStart;
             aXStart = aXEnd;

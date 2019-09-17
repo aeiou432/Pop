@@ -2,21 +2,23 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public static class GlobalDefine {
     public static float W = 0.707f;
     public static int MaxLevel = 9;
-    public static int TimeInterval = 20;
+    public static int TimeInterval = 10;
     public static float DrawPoint = 300;
     public static int LOCAL_DISPLAY_WIDTH = 600;
     public static int LOCAL_DISPLAY_HEIGHT = 1000;
-    public static string ResBallPath = "Assets/Prefabs/";
+    public static Color32 Black = new Color32(0, 0, 0, byte.MaxValue);
+    public static Color32 White = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 }
 public static class GlobalValue {
     public static int TopLevel;
     public static int RuleIndex;
     public static RuleBase Rule;
-    public static Color[] pixels = new Color[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
+    public static Color32[] pixels = new Color32[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
     public static bool[] fillPixels = new bool[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
 }
 public class InterNode {
@@ -29,6 +31,7 @@ public class InterNode {
     public List<InterNode> subs;
     public int level = 0;
     public int branchMethod = 0;
+    public SpriteRenderer line;
 
     public InterNode(float maxHeight, InterNode from = null, bool mainOrder = false) {
         if (from != null) {
@@ -93,9 +96,11 @@ public class InterNode {
             startPointX = startPoint.z;
             endPointX = endPoint.z;
         }
-        DrawLine.DrawThickLine(Mathf.RoundToInt(startPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-startPoint.y),
-                Mathf.RoundToInt(endPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width),
-                ThicknessMod.LINE_THICKNESS_MIDDLE, Color.white);
+        /*line.transform.position = new Vector3(startPointX + GlobalDefine.DrawPoint, -startPoint.y);
+        line.transform.localScale = new Vector3(this.height, width + 2, 1);*/
+        /*DrawLine.DrawThickLine(Mathf.RoundToInt(startPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-startPoint.y),
+                Mathf.RoundToInt(endPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width + 2),
+                ThicknessMod.LINE_THICKNESS_MIDDLE, GlobalDefine.White);*/
         float subWidth = width * GlobalDefine.W;
         if (this.subs == null) {
             return;
