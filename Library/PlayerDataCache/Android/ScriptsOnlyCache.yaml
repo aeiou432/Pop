@@ -48,13 +48,7 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 21
       Script: {instanceID: 0}
-    - Class: 23
-      Script: {instanceID: 0}
     - Class: 28
-      Script: {instanceID: 0}
-    - Class: 33
-      Script: {instanceID: 0}
-    - Class: 43
       Script: {instanceID: 0}
     - Class: 48
       Script: {instanceID: 0}
@@ -72,38 +66,36 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 104
       Script: {instanceID: 0}
-    - Class: 108
-      Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 9736}
+      Script: {instanceID: 9740}
     - Class: 114
-      Script: {instanceID: 9748}
+      Script: {instanceID: 9752}
     - Class: 114
-      Script: {instanceID: 9930}
+      Script: {instanceID: 9932}
     - Class: 114
-      Script: {instanceID: 9972}
+      Script: {instanceID: 9974}
     - Class: 114
-      Script: {instanceID: 10198}
+      Script: {instanceID: 10200}
     - Class: 114
-      Script: {instanceID: 10424}
+      Script: {instanceID: 10426}
     - Class: 114
-      Script: {instanceID: 10466}
+      Script: {instanceID: 10468}
     - Class: 114
-      Script: {instanceID: 10642}
+      Script: {instanceID: 10644}
     - Class: 114
-      Script: {instanceID: 10682}
+      Script: {instanceID: 10684}
     - Class: 114
-      Script: {instanceID: 10864}
+      Script: {instanceID: 10866}
     - Class: 114
-      Script: {instanceID: 11142}
+      Script: {instanceID: 11144}
     - Class: 114
-      Script: {instanceID: 11176}
+      Script: {instanceID: 11178}
     - Class: 114
-      Script: {instanceID: 11220}
+      Script: {instanceID: 11222}
     - Class: 114
-      Script: {instanceID: 11376}
+      Script: {instanceID: 11378}
     - Class: 114
-      Script: {instanceID: 11782}
+      Script: {instanceID: 11784}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -383,7 +375,7 @@ ScriptsOnlyBuild:
     className: ScrollRect
   - hash:
       serializedVersion: 2
-      Hash: 1140f7a17482f43c9a97c7268ed1da3c
+      Hash: 91749fd11ee8bede867f9bd23f84dc1b
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Game

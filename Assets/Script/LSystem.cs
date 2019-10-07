@@ -8,18 +8,12 @@ public static class GlobalDefine {
     public static float W = 0.707f;
     public static int MaxLevel = 9;
     public static int TimeInterval = 10;
-    public static float DrawPoint = 300;
-    public static int LOCAL_DISPLAY_WIDTH = 600;
-    public static int LOCAL_DISPLAY_HEIGHT = 1000;
-    public static Color32 Black = new Color32(0, 0, 0, byte.MaxValue);
-    public static Color32 White = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 }
 public static class GlobalValue {
     public static int TopLevel;
     public static int RuleIndex;
     public static RuleBase Rule;
-    public static Color32[] pixels = new Color32[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
-    public static bool[] fillPixels = new bool[GlobalDefine.LOCAL_DISPLAY_WIDTH * GlobalDefine.LOCAL_DISPLAY_HEIGHT];
+    public static List<GameObject> LineObjects;
 }
 public class InterNode {
     public float height = 0;
@@ -31,7 +25,7 @@ public class InterNode {
     public List<InterNode> subs;
     public int level = 0;
     public int branchMethod = 0;
-    public SpriteRenderer line;
+    private GameObject line;
 
     public InterNode(float maxHeight, InterNode from = null, bool mainOrder = false) {
         if (from != null) {
@@ -48,6 +42,13 @@ public class InterNode {
         }
         else {
             this.growHeight = maxHeight;
+        }
+        if (GlobalValue.LineObjects.Count <= 1) {
+            this.line = GameObject.Instantiate<GameObject>(GlobalValue.LineObjects[0], GlobalValue.LineObjects[0].transform.parent);
+        }
+        else {
+            this.line = GlobalValue.LineObjects[GlobalValue.LineObjects.Count - 1];
+            GlobalValue.LineObjects.RemoveAt(GlobalValue.LineObjects.Count -1 );
         }
     }
     public void Grow() {
@@ -87,20 +88,22 @@ public class InterNode {
     }
     public void Draw(Vector3 startPoint, float width) {
         Vector3 endPoint = startPoint + this.angleVector * this.height;
-        float startPointX, endPointX;
-        if (GlobalValue.Rule.DrawAxis) {
-            startPointX = startPoint.x;
-            endPointX = endPoint.x;
+        Vector3 drawStartPoint = startPoint;
+        Vector3 drawVector = this.angleVector;
+        drawStartPoint.y = -startPoint.y - 500;
+        drawVector.y = -this.angleVector.y;
+        if (!GlobalValue.Rule.DrawAxis) {
+            drawStartPoint.x = startPoint.z;
+            drawVector.x = this.angleVector.z;
+            drawStartPoint.z = startPoint.x;
+            drawVector.z = this.angleVector.x;
         }
-        else {
-            startPointX = startPoint.z;
-            endPointX = endPoint.z;
-        }
-        /*line.transform.position = new Vector3(startPointX + GlobalDefine.DrawPoint, -startPoint.y);
-        line.transform.localScale = new Vector3(this.height, width + 2, 1);*/
-        /*DrawLine.DrawThickLine(Mathf.RoundToInt(startPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-startPoint.y),
-                Mathf.RoundToInt(endPointX + GlobalDefine.DrawPoint), Mathf.RoundToInt(-endPoint.y), Mathf.RoundToInt(width + 2),
-                ThicknessMod.LINE_THICKNESS_MIDDLE, GlobalDefine.White);*/
+        this.line.gameObject.SetActive(true);
+        this.line.transform.localPosition = drawStartPoint / 100;
+        this.line.transform.localScale = new Vector3((width + 1) / 100, height / 100, 1);
+        Quaternion rotate = Quaternion.FromToRotation(Vector3.up, drawVector);
+        this.line.transform.localRotation = rotate;
+
         float subWidth = width * GlobalDefine.W;
         if (this.subs == null) {
             return;
@@ -120,6 +123,18 @@ public class InterNode {
             }
         }
     }
+    public void Destroy() {
+        if(this.subs != null) {
+            for(int i = 0; i < this.subs.Count; i++) {
+                this.subs[i].Destroy();
+            }
+            this.subs.Clear();
+            this.subs = null;
+        }
+        this.line.gameObject.SetActive(false);
+        GlobalValue.LineObjects.Add(this.line);
+        this.line = null;
+    }
 }
 public class LSystem {
     [JsonProperty] private InterNode node;
@@ -129,6 +144,9 @@ public class LSystem {
     public void Init() {
         GlobalValue.Rule = RuleManager.Instance.RandomPickRule();
         GlobalValue.RuleIndex = RuleManager.Instance.RuleIndex;
+        if (this.node != null) {
+            this.node.Destroy();
+        }
         this.node = new InterNode(this.length);
         this.CountGrowNumber();
     }

@@ -69,23 +69,15 @@
     <Compile Include="Assets\Script\Ball\BallManager.cs" />
     <Compile Include="Assets\Script\Bubble.cs" />
     <Compile Include="Assets\Script\CustomButton.cs" />
-    <Compile Include="Assets\Script\DrawLine.cs" />
     <Compile Include="Assets\Script\Game.cs" />
     <Compile Include="Assets\Script\GaussianBlur.cs" />
     <Compile Include="Assets\Script\LSystem.cs" />
     <Compile Include="Assets\Script\PostEffectsBase.cs" />
     <Compile Include="Assets\Script\Rule.cs" />
     <Compile Include="Assets\Script\Vibrater.cs" />
-    <None Include="Assets\Shader\NewImageEffectShader.shader" />
-    <None Include="Assets\Shader\Halo.shader" />
-    <None Include="Assets\Shader\Chapter12-GaussianBlur1.shader" />
-    <None Include="Assets\Shader\ImageEffectShader.shader" />
+    <None Include="Assets\Shader\AverageBlur.shader" />
     <None Include="Assets\UnityAds\link.xml" />
-    <None Include="Assets\Shader\Chapter12-GaussianBlur.shader" />
     <None Include="Assets\JsonDotNet\link.xml" />
-    <None Include="Assets\Shader\Halo1.shader" />
-    <None Include="Assets\Shader\Chapter12-Bloom.shader" />
-    <None Include="Assets\Shader\UnlitShader.shader" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Project/TapTree/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

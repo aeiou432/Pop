@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Monetization;
-using UnityEngine.Profiling;
 using UnityEngine.UI;
 
 public class BallData {
@@ -24,8 +23,7 @@ public class BallData {
 }
 public class Game : MonoBehaviour {
     public BallManager BallManager;
-    public SpriteRenderer Tree;
-    public SpriteRenderer Line;
+    public List<GameObject> LineObjtects;
     public Text Number;
     public Text LeftTime;
     public AudioSource Audio;
@@ -72,6 +70,7 @@ public class Game : MonoBehaviour {
         this.bubblePool = new List<Bubble>();
         this.nowAudio = this.Audio;
         this.dataPath = Application.persistentDataPath + "/save.txt";
+        GlobalValue.LineObjects = this.LineObjtects;
         this.LoadData();
         if (this.lTree == null) {
             this.lTree = new LSystem();
@@ -90,7 +89,6 @@ public class Game : MonoBehaviour {
         }
         this.OnBackgroundClick();
         this.lTree.Draw();
-        this.ApplyTexture();
         this.PlayGame();
     }
     public void OnApplicationQuit() {
@@ -103,9 +101,7 @@ public class Game : MonoBehaviour {
     }
     public void FixedUpdate() {
         if (this.textureUpdate) {
-            this.ClearTexture();
             this.lTree.Draw();
-            this.ApplyTexture();
             this.HideOrShowNumberAndReset();
             this.textureUpdate = false;
         }
@@ -119,9 +115,7 @@ public class Game : MonoBehaviour {
     }
     public void OnResetClick() {
         this.lTree.Init();
-        this.ClearTexture();
         this.lTree.Draw();
-        this.ApplyTexture();
         GlobalValue.TopLevel = 0;
         this.HideOrShowNumberAndReset();
     }
@@ -263,17 +257,5 @@ public class Game : MonoBehaviour {
             this.Reset.gameObject.SetActive(true);
             this.Number.gameObject.SetActive(false);
         }
-    }
-    private void ClearTexture() {
-        for (int i = 0; i < GlobalValue.fillPixels.Length; i++) {
-            if (GlobalValue.fillPixels[i]) {
-                GlobalValue.pixels[i] = GlobalDefine.Black;
-            }
-        }
-        GlobalValue.fillPixels.Initialize();
-    }
-    private void ApplyTexture() {
-        this.Tree.sprite.texture.SetPixels32(GlobalValue.pixels);
-        this.Tree.sprite.texture.Apply();
     }
 }

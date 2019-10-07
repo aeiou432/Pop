@@ -18,7 +18,7 @@ public class GaussianBlur : PostEffectsBase {
 	public int iterations = 3;
 	
 	// Blur spread for each iteration - larger value means more blur
-	[Range(0.2f, 3.0f)]
+	[Range(0, 3.0f)]
 	public float blurSpread = 0.6f;
 	
 	[Range(1, 8)]
@@ -26,44 +26,6 @@ public class GaussianBlur : PostEffectsBase {
 
     [Range(0.0f, 2.0f)]
     public float strength = 1;
-	/// 1st edition: just apply blur
-//	void OnRenderImage(RenderTexture src, RenderTexture dest) {
-//		if (material != null) {
-//			int rtW = src.width;
-//			int rtH = src.height;
-//			RenderTexture buffer = RenderTexture.GetTemporary(rtW, rtH, 0);
-//
-//			// Render the vertical pass
-//			Graphics.Blit(src, buffer, material, 0);
-//			// Render the horizontal pass
-//			Graphics.Blit(buffer, dest, material, 1);
-//
-//			RenderTexture.ReleaseTemporary(buffer);
-//		} else {
-//			Graphics.Blit(src, dest);
-//		}
-//	} 
-
-	/// 2nd edition: scale the render texture
-//	void OnRenderImage (RenderTexture src, RenderTexture dest) {
-//		if (material != null) {
-//			int rtW = src.width/downSample;
-//			int rtH = src.height/downSample;
-//			RenderTexture buffer = RenderTexture.GetTemporary(rtW, rtH, 0);
-//			buffer.filterMode = FilterMode.Bilinear;
-//
-//			// Render the vertical pass
-//			Graphics.Blit(src, buffer, material, 0);
-//			// Render the horizontal pass
-//			Graphics.Blit(buffer, dest, material, 1);
-//
-//			RenderTexture.ReleaseTemporary(buffer);
-//		} else {
-//			Graphics.Blit(src, dest);
-//		}
-//	}
-
-	/// 3rd edition: use iterations for larger blur
 	void OnRenderImage (RenderTexture src, RenderTexture dest) {
 		if (material != null) {
 			int rtW = src.width/downSample;
@@ -71,11 +33,12 @@ public class GaussianBlur : PostEffectsBase {
 
 			RenderTexture buffer0 = RenderTexture.GetTemporary(rtW, rtH, 0);
 			buffer0.filterMode = FilterMode.Bilinear;
+            float blureSize = blurSpread * Screen.width / 600;
 
-			Graphics.Blit(src, buffer0);
+            Graphics.Blit(src, buffer0);
 
 			for (int i = 0; i < iterations; i++) {
-				material.SetFloat("_BlurSize", 1.0f + blurSpread);
+				material.SetFloat("_BlurSize", 1.0f + blureSize);
                 material.SetFloat("_BlurStrength", strength);
                 RenderTexture buffer1 = RenderTexture.GetTemporary(rtW, rtH, 0);
 
@@ -84,14 +47,6 @@ public class GaussianBlur : PostEffectsBase {
 
 				RenderTexture.ReleaseTemporary(buffer0);
 				buffer0 = buffer1;
-                
-                /*buffer1 = RenderTexture.GetTemporary(rtW, rtH, 0);
-
-				// Render the horizontal pass
-				Graphics.Blit(buffer0, buffer1, material, 1);
-
-				RenderTexture.ReleaseTemporary(buffer0);
-				buffer0 = buffer1;*/
             }
 
 			Graphics.Blit(buffer0, dest);
