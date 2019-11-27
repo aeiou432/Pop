@@ -27,7 +27,7 @@ public class GaussianBlur : PostEffectsBase {
     [Range(0.0f, 2.0f)]
     public float strength = 1;
 	void OnRenderImage (RenderTexture src, RenderTexture dest) {
-		if (material != null) {
+        if (material != null) {
 			int rtW = src.width/downSample;
 			int rtH = src.height/downSample;
 
@@ -47,6 +47,13 @@ public class GaussianBlur : PostEffectsBase {
 
 				RenderTexture.ReleaseTemporary(buffer0);
 				buffer0 = buffer1;
+                buffer1 = RenderTexture.GetTemporary(rtW, rtH, 0);
+
+                // Render the vertical pass
+                Graphics.Blit(buffer0, buffer1, material, 1);
+
+                RenderTexture.ReleaseTemporary(buffer0);
+                buffer0 = buffer1;
             }
 
 			Graphics.Blit(buffer0, dest);

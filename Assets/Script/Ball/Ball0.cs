@@ -1,16 +1,34 @@
 ﻿using UnityEngine;
 
 public class Ball0 : BallBase {
+    public Animator startFlash;
     private float time;
     private bool enable;
     private float stackTime;
     private bool playAudio;
-
+    private float nextFlashTime;
+    private float flashTime = -1;
+    private float[] randomRange = { 2f, 5f};
     public void Start() {
+        this.nextFlashTime = Time.time + Random.Range(randomRange[0], randomRange[1]);
+        this.startFlash.Play("LightFlash", 0, Random.Range(0f, 1f));
         this.Button.onMouseDownEvent.AddListener(this.PressDown);
         this.Button.onMouseUpEvent.AddListener(this.PressUp);
     }
     public void Update() {
+        if (Time.time <= this.flashTime - 0.5 ) {
+            this.GetComponent<CanvasGroup>().alpha = this.flashTime - Time.time;
+        }
+        else if (Time.time <= this.flashTime) {
+            this.GetComponent<CanvasGroup>().alpha = 1 - (this.flashTime - Time.time);
+        }
+        else {
+            this.GetComponent<CanvasGroup>().alpha = 1;
+        }
+        if (Time.time > this.nextFlashTime) {
+            this.flashTime = Time.time + 1;
+            this.nextFlashTime = Time.time + Random.Range(randomRange[0], randomRange[1]);
+        }
         if (!this.enable) {
             if (Time.time > this.time) return;
             float scale = (this.time - Time.time) * 0.5f + 1;

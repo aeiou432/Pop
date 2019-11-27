@@ -8,6 +8,10 @@ public static class GlobalDefine {
     public static float W = 0.707f;
     public static int MaxLevel = 9;
     public static int TimeInterval = 10;
+    public static int MaxWaterNumber = 100;
+    public static int WaterPerFill = 10;
+    public static int BallNumberOnce = 5;
+    public static int BubbleNumber = 50;
 }
 public static class GlobalValue {
     public static int TopLevel;

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 public class BubbleEvent : UnityEvent<Bubble> { }
 public class Bubble : MonoBehaviour {
@@ -11,6 +10,7 @@ public class Bubble : MonoBehaviour {
     public AudioSource Audio1;
     public GameObject Light;
     public Sprite Bubble2;
+    public GameObject Container;
     private Vector3 target;
     private float smooth = 1f;
     private float enableTime;
@@ -22,7 +22,6 @@ public class Bubble : MonoBehaviour {
     private Vector2 floatVelocity;
     private float missTime;
     void Start() {
-        //this.target = this.transform.localPosition;
         Animator bubbleRotate = this.Button.GetComponent<Animator>();
         bubbleRotate.speed = UnityEngine.Random.Range(0f, 1f);
         this.Button.onPointerEnter.AddListener(this.Hover);
@@ -49,10 +48,13 @@ public class Bubble : MonoBehaviour {
         //this.Audio1.PlayDelayed(UnityEngine.Random.Range(0, 0.1f));
         this.Audio1.Play();
         this.Light.SetActive(false);
+
+        Rigidbody2D test = this.GetComponent<Rigidbody2D>();
+        test.AddForce(new Vector2(Random.Range(-100, 100), Random.Range(-100, 100)), ForceMode2D.Impulse);
     }
     public void Update() {
         if (this.Button.IsInteractable()) {
-            if (!this.startFloat) {
+            /*if (!this.startFloat) {
                 this.transform.localPosition = Vector3.Lerp(this.transform.localPosition, this.target, this.smooth * Time.deltaTime);
                 if (Vector3.Distance(this.transform.localPosition, this.target) < 0.5) {
                     this.startFloat = true;
@@ -73,7 +75,7 @@ public class Bubble : MonoBehaviour {
                 pos.x += (floatVelocity.x * Time.deltaTime);
                 pos.y += (floatVelocity.y * Time.deltaTime);
                 this.transform.localPosition = pos;
-            }
+            }*/
         }
 
         if (this.endTime != 0 && Time.time > this.endTime) {
@@ -93,7 +95,7 @@ public class Bubble : MonoBehaviour {
         if (!this.Button.IsInteractable()) return;
         if (Time.time < this.enableTime) return;
         this.Button.image.raycastTarget = false;
-        Vibration.Vibrate(80);
+        //Vibration.Vibrate(80);
         this.Audio.Play();
         this.Button.interactable = false;
         this.Button.transform.localScale = this.Button.transform.localScale * 1.2f;
@@ -102,8 +104,7 @@ public class Bubble : MonoBehaviour {
         this.Light.SetActive(true);
         this.Light.transform.localPosition = Vector3.zero;
         this.lightingTime = Time.time + 1f;
-        this.target = new Vector3(Screen.width / 2, 0, 0);
+        this.target = this.Container.transform.position;
         this.velocity = this.target - this.Light.transform.position;
     }
-
 }
