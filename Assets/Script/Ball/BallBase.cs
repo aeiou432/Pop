@@ -14,7 +14,6 @@ public class BallBase : MonoBehaviour {
     public BallEvent Boo = new BallEvent();
     public CustomButton Button;
     public AudioSource Audio;
-    public AudioSource Audio1;
     public BallData data;
 
     public virtual void Reset(BallData data) {

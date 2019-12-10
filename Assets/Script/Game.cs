@@ -26,14 +26,9 @@ public class Game : MonoBehaviour {
     public List<GameObject> LineObjtects;
     public Text Number;
     public Text LeftTime;
-    public AudioSource Audio;
-    public List<AudioSource> Audio1;
-    public List<AudioSource> Audio2;
-    public List<AudioSource> Audio3;
     public Ball0 ResBall;
     public Bubble ResBubble;
     public Button Reset;
-    public Button BackGround;
     public GameObject UIObj;
     public Gardener Gardener;
     public Image Container;
@@ -50,7 +45,6 @@ public class Game : MonoBehaviour {
     private int audioIndex2;
     private int audioIndex3;
     private DateTime nextTime;
-    private AudioSource nowAudio;
     private static string ruleIndex = "ruleIndex";
     private static string nextDateTime = "nextDateTime";
     private static string adShow = "adShow";
@@ -63,14 +57,13 @@ public class Game : MonoBehaviour {
     private LSystem lTree;
     public void Start() {
 #if UNITY_ANDROID
-        Monetization.Initialize(androidGameId, true);
+        //Monetization.Initialize(androidGameId, true);
 #else
-        Monetization.Initialize(iOSGameId, true);
+        //Monetization.Initialize(iOSGameId, true);
 #endif
         this.balls = new List<BallBase>();
         this.bubbles = new List<Bubble>();
         this.bubblePool = new List<Bubble>();
-        this.nowAudio = this.Audio;
         this.dataPath = Application.persistentDataPath + "/save.txt";
         GlobalValue.LineObjects = this.LineObjtects;
         this.LoadData();
@@ -83,19 +76,18 @@ public class Game : MonoBehaviour {
         }
         if (this.ballDatas == null) {
             this.ballDatas = new List<BallData>();
-            for (int i = 0; i < GlobalDefine.BallNumberOnce; i++) {
-                BallData data = new BallData();
-                data.SetRandomData();
-                this.ballDatas.Add(data);
-            }
         }
-        this.OnBackgroundClick();
+        for (int i = this.ballDatas.Count; i < GlobalDefine.BallNumberOnce; i++) {
+            BallData data = new BallData();
+            data.SetRandomData();
+            this.ballDatas.Add(data);
+        }
         this.lTree.Draw();
         this.Container.fillAmount = (float)this.totalWater / (float)GlobalDefine.MaxWaterNumber;
         if (this.totalWater <= 0) {
             this.Gardener.NoWater = true;
         }
-        this.PlayGame();
+        StartCoroutine(this.PlayGame());
     }
     public void OnApplicationQuit() {
         this.SaveDate();
@@ -115,25 +107,11 @@ public class Game : MonoBehaviour {
             }
         }
     }
-    public void OnBackgroundClick() {
-        this.UIObj.gameObject.SetActive(true);
-        this.BackGround.gameObject.SetActive(false);
-        for (int i = 0; i < this.balls.Count; i++) {
-            this.balls[i].gameObject.SetActive(true);
-        }
-    }
     public void OnResetClick() {
         this.lTree.Init();
         this.lTree.Draw();
         GlobalValue.TopLevel = 0;
         this.HideOrShowNumberAndReset();
-    }
-    public void OnHideClick() {
-        this.UIObj.gameObject.SetActive(false);
-        this.BackGround.gameObject.SetActive(true);
-        for (int i = 0; i < this.balls.Count; i++) {
-            this.balls[i].gameObject.SetActive(false);
-        }
     }
     public void OnGardenerFilled() {
         this.Gardener.WaterNumber =
@@ -155,11 +133,11 @@ public class Game : MonoBehaviour {
             this.showAd = false;
         }*/
     }
-    private void PlayGame() {
-        this.BackGround.gameObject.SetActive(false);
+    private IEnumerator PlayGame() {
         this.HideOrShowNumberAndReset();
         for (int i = 0; i < this.ballDatas.Count; i++) {
             this.ShowBall(this.ballDatas[i]);
+            yield return new WaitForSeconds(0.1f);
         }
         if (this.balls.Count < GlobalDefine.BallNumberOnce) {
             this.StartCoroutine(this.CheckTime());
@@ -171,7 +149,7 @@ public class Game : MonoBehaviour {
     private IEnumerator CheckTime() {
         this.LeftTime.gameObject.SetActive(true);
         while (true) {
-            DateTime time = DateTime.UtcNow;
+            DateTime time = DateTime.Now;
             while (time >= this.nextTime) {
                 this.RandomCreateBallData();
                 if (this.balls.Count >= GlobalDefine.BallNumberOnce) {
@@ -198,15 +176,12 @@ public class Game : MonoBehaviour {
     private bool FindUnusedBallData(BallData data) {
         return !data.Enable;
     }
-    private void PlaySound() {
-        if (this.nowAudio.isPlaying) return;
-        this.nowAudio.Play();
-    }
     private void SaveDate() {
-        PlayerPrefs.SetString(nextDateTime, this.nextTime.ToString());
+        PlayerPrefs.SetString(nextDateTime, this.nextTime.ToString("o")) ;
         PlayerPrefs.SetInt(adShow, this.showAd ? 1 : 0);
         PlayerPrefs.SetInt(ruleIndex, GlobalValue.RuleIndex);
         PlayerPrefs.SetInt(waterNumber, this.totalWater);
+        PlayerPrefs.Save();
         using (StreamWriter sw = new StreamWriter(dataPath)) {
             string save = JsonConvert.SerializeObject(this.lTree);
             sw.WriteLine(save);
@@ -237,12 +212,12 @@ public class Game : MonoBehaviour {
         this.balls.Remove(ball);
         if (this.balls.Count == GlobalDefine.BallNumberOnce - 1) {
             this.StopCoroutine(this.CheckTime());
-            this.nextTime = DateTime.UtcNow.AddSeconds(GlobalDefine.TimeInterval);
+            this.nextTime = DateTime.Now.AddSeconds(GlobalDefine.TimeInterval);
             this.StartCoroutine(this.CheckTime());
         }
-        this.StartCoroutine(this.CreateBubbles(ball.transform.position, GlobalDefine.BubbleNumber));
+        this.CreateBubbles(ball.transform.position, GlobalDefine.BubbleNumber);
     }
-    private IEnumerator CreateBubbles(Vector3 position, int number) {
+    private void CreateBubbles(Vector3 position, int number) {
         Bubble bubble;
         for (int i = 0; i < number; i++) {
             if (this.bubblePool.Count <= 0) {
@@ -256,9 +231,7 @@ public class Game : MonoBehaviour {
             }
             bubble.Begin(position);
             this.bubbles.Add(bubble);
-            //yield return new WaitForSeconds(0.01f);
         }
-        yield return new WaitForSeconds(0.01f);
     }
     private void RecycleBubble(Bubble bubble) {
         this.bubblePool.Add(bubble);

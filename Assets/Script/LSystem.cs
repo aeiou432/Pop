@@ -9,9 +9,9 @@ public static class GlobalDefine {
     public static int MaxLevel = 9;
     public static int TimeInterval = 10;
     public static int MaxWaterNumber = 100;
-    public static int WaterPerFill = 10;
-    public static int BallNumberOnce = 5;
-    public static int BubbleNumber = 50;
+    public static int WaterPerFill = 100;
+    public static int BallNumberOnce = 10;
+    public static int BubbleNumber = 20;
 }
 public static class GlobalValue {
     public static int TopLevel;
