@@ -10,7 +10,6 @@ using UnityEngine.UI;
 public class BallData {
     public BallType Type;
     public Vector2 Pos;
-    public bool Enable;
     public void SetRandomData() {
         float screenRate = Screen.width / 720f;
         float edge = screenRate * 150f;
@@ -18,7 +17,6 @@ public class BallData {
         float randomY = UnityEngine.Random.Range(edge, Screen.height - edge);
         Vector2 touchPosition = new Vector2(randomX, randomY);
         this.Pos = touchPosition;
-        this.Enable = true;
     }
 }
 public class Game : MonoBehaviour {
@@ -77,17 +75,12 @@ public class Game : MonoBehaviour {
         if (this.ballDatas == null) {
             this.ballDatas = new List<BallData>();
         }
-        for (int i = this.ballDatas.Count; i < GlobalDefine.BallNumberOnce; i++) {
-            BallData data = new BallData();
-            data.SetRandomData();
-            this.ballDatas.Add(data);
-        }
         this.lTree.Draw();
         this.Container.fillAmount = (float)this.totalWater / (float)GlobalDefine.MaxWaterNumber;
         if (this.totalWater <= 0) {
             this.Gardener.NoWater = true;
         }
-        StartCoroutine(this.PlayGame());
+        this.PlayGame();
     }
     public void OnApplicationQuit() {
         this.SaveDate();
@@ -133,12 +126,8 @@ public class Game : MonoBehaviour {
             this.showAd = false;
         }*/
     }
-    private IEnumerator PlayGame() {
+    private void PlayGame() {
         this.HideOrShowNumberAndReset();
-        for (int i = 0; i < this.ballDatas.Count; i++) {
-            this.ShowBall(this.ballDatas[i]);
-            yield return new WaitForSeconds(0.1f);
-        }
         if (this.balls.Count < GlobalDefine.BallNumberOnce) {
             this.StartCoroutine(this.CheckTime());
         }
@@ -150,31 +139,38 @@ public class Game : MonoBehaviour {
         this.LeftTime.gameObject.SetActive(true);
         while (true) {
             DateTime time = DateTime.Now;
-            while (time >= this.nextTime) {
-                this.RandomCreateBallData();
-                if (this.balls.Count >= GlobalDefine.BallNumberOnce) {
-                    this.LeftTime.gameObject.SetActive(false);
-                    yield break;
+            if (this.ballDatas.Count < GlobalDefine.BallNumberOnce) {
+                while (time >= this.nextTime) {
+                    BallData data = new BallData();
+                    data.SetRandomData();
+                    this.ballDatas.Add(data);
+                    if (this.ballDatas.Count >= GlobalDefine.BallNumberOnce) {
+                        this.LeftTime.gameObject.SetActive(false);
+                        break;
+                    }
+                    this.nextTime = this.nextTime.AddSeconds(GlobalDefine.TimeInterval);
                 }
-                this.nextTime = this.nextTime.AddSeconds(GlobalDefine.TimeInterval);
+                TimeSpan span = this.nextTime - time;
+                this.LeftTime.text = span.Minutes + ":" + (span.Seconds + 1).ToString("00");
             }
-            TimeSpan span = this.nextTime - time;
-            this.LeftTime.text = span.Minutes + ":" + (span.Seconds + 1).ToString("00");
+
+            if (this.balls.Count < this.ballDatas.Count) {
+                ShowBall();
+            }
             yield return new WaitForSeconds(1);
         }
     }
-    public void ShowBall(BallData data) {
-        if (!data.Enable) return;
-        BallBase ball = this.BallManager.GetBall(data, this.Boo);
-        this.balls.Add(ball);
+    private void ShowBall() {
+        this.StopCoroutine(this.StartShowBall());
+        this.StartCoroutine(this.StartShowBall());
     }
-    private void RandomCreateBallData() {
-        BallData data = this.ballDatas.Find(this.FindUnusedBallData);
-        data.SetRandomData();
-        this.ShowBall(data);
-    }
-    private bool FindUnusedBallData(BallData data) {
-        return !data.Enable;
+    private IEnumerator StartShowBall() {
+        for (int i = this.balls.Count; i < this.ballDatas.Count; i++) {
+            BallData data = this.ballDatas[i];
+            BallBase ball = this.BallManager.GetBall(data, this.Boo);
+            this.balls.Add(ball);
+            yield return new WaitForSeconds(0.1f);
+        }
     }
     private void SaveDate() {
         PlayerPrefs.SetString(nextDateTime, this.nextTime.ToString("o")) ;
@@ -208,9 +204,10 @@ public class Game : MonoBehaviour {
         }
     }
     private void Boo(BallBase ball) {
+        this.ballDatas.Remove(ball.data);
         this.BallManager.Recycle(ball);
         this.balls.Remove(ball);
-        if (this.balls.Count == GlobalDefine.BallNumberOnce - 1) {
+        if (this.ballDatas.Count == GlobalDefine.BallNumberOnce - 1) {
             this.StopCoroutine(this.CheckTime());
             this.nextTime = DateTime.Now.AddSeconds(GlobalDefine.TimeInterval);
             this.StartCoroutine(this.CheckTime());

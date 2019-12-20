@@ -42,7 +42,6 @@ public class BallManager : MonoBehaviour {
         }
         BallType type = ball.data.Type;
         ball.Boo.RemoveAllListeners();
-        ball.data.Enable = false;
         ball.data = null;
         this.ballPool[type].Add(ball);
     }
