@@ -16,7 +16,6 @@ public static class GlobalDefine {
 public static class GlobalValue {
     public static int TopLevel;
     public static int RuleIndex;
-    public static RuleBase Rule;
     public static List<GameObject> LineObjects;
 }
 public class InterNode {
@@ -70,7 +69,8 @@ public class InterNode {
                 GlobalValue.TopLevel = level;
             }
             this.subs = new List<InterNode>();
-            GlobalValue.Rule.P[this.branchMethod](this);
+            ActionManager.Instance.Grow(this);
+            //GlobalValue.Rule.P[this.branchMethod](this);
         }
     }
     public void Left(float angle, InterNode from) {
@@ -96,7 +96,7 @@ public class InterNode {
         Vector3 drawVector = this.angleVector;
         drawStartPoint.y = -startPoint.y - 500;
         drawVector.y = -this.angleVector.y;
-        if (!GlobalValue.Rule.DrawAxis) {
+        if (ActionManager.Instance.drawAxis) {
             drawStartPoint.x = startPoint.z;
             drawVector.x = this.angleVector.z;
             drawStartPoint.z = startPoint.x;
@@ -146,8 +146,7 @@ public class LSystem {
     private int length = 150;
     public int GrowNumber;
     public void Init() {
-        GlobalValue.Rule = RuleManager.Instance.RandomPickRule();
-        GlobalValue.RuleIndex = RuleManager.Instance.RuleIndex;
+        ActionManager.Instance.RandomSet();
         if (this.node != null) {
             this.node.Destroy();
         }
@@ -168,11 +167,16 @@ public class LSystem {
         int total = 0;
         float lenth = this.length;
         float maxR = 0;
-        for (int i = 0; i < GlobalValue.Rule.R.Count; i++) {
-            if (GlobalValue.Rule.R[i] > maxR) {
-                maxR = GlobalValue.Rule.R[i];
+        for (int i = 0; i < ActionManager.Instance.actionBases.Count; i++) {
+            foreach (ActionBase actionBase in ActionManager.Instance.actionBases[i]) {
+                if (actionBase is ToA || actionBase is ToB || actionBase is ToC) {
+                    if (actionBase.Parameter > maxR) {
+                        maxR = actionBase.Parameter;
+                    }
+                }
             }
         }
+        maxR /= 100;
         for (int i = 0; i <= GlobalDefine.MaxLevel; i++) {
             if (i <= 1) {
                 total += ((int)lenth / 10);

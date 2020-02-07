@@ -136,10 +136,10 @@ public class Game : MonoBehaviour {
         }
     }
     private IEnumerator CheckTime() {
-        this.LeftTime.gameObject.SetActive(true);
         while (true) {
             DateTime time = DateTime.Now;
             if (this.ballDatas.Count < GlobalDefine.BallNumberOnce) {
+                this.LeftTime.gameObject.SetActive(true);
                 while (time >= this.nextTime) {
                     BallData data = new BallData();
                     data.SetRandomData();
@@ -181,8 +181,11 @@ public class Game : MonoBehaviour {
         using (StreamWriter sw = new StreamWriter(dataPath)) {
             string save = JsonConvert.SerializeObject(this.lTree);
             sw.WriteLine(save);
-            save = JsonConvert.SerializeObject(GlobalValue.Rule);
-            sw.WriteLine(save);
+
+            string[] actionStrings = ActionManager.Instance.Save();
+            sw.WriteLine(actionStrings[0]);
+            sw.WriteLine(actionStrings[1]);
+
             save = JsonConvert.SerializeObject(this.ballDatas);
             sw.WriteLine(save);
         }
@@ -196,8 +199,12 @@ public class Game : MonoBehaviour {
             using (StreamReader sr = new StreamReader(dataPath)) {
                 string data = sr.ReadLine();
                 this.lTree = JsonConvert.DeserializeObject<LSystem>(data);
-                data = sr.ReadLine();
-                GlobalValue.Rule = RuleManager.Instance.JsonDeserialize(data, GlobalValue.RuleIndex);
+
+                string[] actionStrings = new string[2];
+                actionStrings[0] = sr.ReadLine();
+                actionStrings[1] = sr.ReadLine();
+                ActionManager.Instance.Load(actionStrings);
+
                 data = sr.ReadLine();
                 this.ballDatas = JsonConvert.DeserializeObject<List<BallData>>(data);
             }
