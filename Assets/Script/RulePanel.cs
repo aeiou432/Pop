@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +10,7 @@ public class RulePanel : MonoBehaviour
     public List<ActionButton> nowActionButtons;
     public Button finishNowRuleSet;
     public Button allFinish;
+    public Button exit;
     public Toggle turnOver;
     public GameObject nowRuleSetBoard;
     public GameObject choosableBoard;
@@ -24,10 +24,7 @@ public class RulePanel : MonoBehaviour
 
     private void Awake()
     {
-        this.actionBases = new List<List<ActionBase>>();
         for (int i = 0; i < this.ruleSets.Count; i++) {
-            this.actionBases.Add(new List<ActionBase>());
-            this.ruleSets[i].SetDatas(this.actionBases[i]);
             int tempi = i;
             ruleSets[i].ruleButton.onClick.AddListener(() => this.OnRuleSetClick(tempi));
         }
@@ -36,6 +33,7 @@ public class RulePanel : MonoBehaviour
             this.nowActionButtons[temp].action.onClick.AddListener(() => this.NowActionClick(this.nowActionButtons[temp]));
         }
         this.allFinish.onClick.AddListener(this.OK);
+        this.exit.onClick.AddListener(this.Exit);
         this.finishNowRuleSet.onClick.AddListener(this.FinishOneRuleSet);
         this.leftAction.SetActionData(new Left());
         this.downAction.SetActionData(new Down());
@@ -105,5 +103,22 @@ public class RulePanel : MonoBehaviour
         ActionManager.Instance.actionBases = this.actionBases;
         ActionManager.Instance.drawAxis = this.turnOver.isOn;
         this.gameObject.SetActive(false);
+    }
+    public void Exit() {
+        this.gameObject.SetActive(false);
+    }
+    public void OpenRulePanel() {
+        this.gameObject.SetActive(true);
+        this.turnOver.isOn = ActionManager.Instance.drawAxis;
+        this.actionBases = new List<List<ActionBase>>();
+        for (int i = 0; i < ActionManager.Instance.actionBases.Count; i++) {
+            this.actionBases.Add(new List<ActionBase>(ActionManager.Instance.actionBases[i]));
+        }
+        for (int i = 0; i < this.ruleSets.Count; i++) {
+            if (i >= this.actionBases.Count) {
+                this.actionBases.Add(new List<ActionBase>());
+            }
+            this.ruleSets[i].SetDatas(this.actionBases[i]);
+        }
     }
 }
